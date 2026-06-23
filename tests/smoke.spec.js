@@ -68,6 +68,79 @@ test("mode checkboxes cannot both be disabled", async ({ page }) => {
   await expect(page.locator("#defense-mode")).toBeChecked();
 });
 
+test("audio cue and realistic glove settings start off and update the round summary", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("#audio-cue-mode")).not.toBeChecked();
+  await expect(page.locator("#realistic-gloves")).not.toBeChecked();
+  await expect(page.locator("#pre-round-summary")).toContainText("audio calls off");
+  await expect(page.locator("#pre-round-summary")).toContainText("labeled cues");
+
+  await page.locator("#audio-cue-mode").check();
+  await page.locator("#realistic-gloves").check();
+  await expect(page.locator("#pre-round-summary")).toContainText("audio calls on");
+  await expect(page.locator("#pre-round-summary")).toContainText("realistic gloves");
+});
+
+test("audio cue mode speaks the generated combo", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__spokenCombos = [];
+    Object.defineProperty(window, "SpeechSynthesisUtterance", {
+      configurable: true,
+      value: class {
+        constructor(text) {
+          this.text = text;
+        }
+      }
+    });
+    Object.defineProperty(window, "speechSynthesis", {
+      configurable: true,
+      value: {
+        cancel() {},
+        getVoices() {
+          return [];
+        },
+        speak(utterance) {
+          window.__spokenCombos.push(utterance.text);
+        }
+      }
+    });
+  });
+  await page.goto("/");
+  await page.locator("#audio-cue-mode").check();
+  await page.getByRole("button", { name: "Play" }).click();
+  await page.waitForTimeout(3200);
+  await expect.poll(() => page.evaluate(() => window.__spokenCombos.length)).toBeGreaterThan(0);
+  await expect.poll(() => page.evaluate(() => window.__spokenCombos.at(-1))).toMatch(/jab|cross|hook|body|block|slip|duck|roll/i);
+});
+
+for (const viewport of [
+  { name: "tall phone", width: 390, height: 844 },
+  { name: "short phone", width: 360, height: 640 }
+]) {
+  test(`mobile HUD keeps stats, coach cue, and pause controls separated on ${viewport.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto("/");
+    await page.getByRole("button", { name: "Play" }).click();
+    await page.waitForTimeout(2800);
+    await expect(page.locator("#hud")).toBeVisible();
+
+    const boxes = await page.evaluate(() => {
+      const readBox = (selector) => {
+        const rect = document.querySelector(selector).getBoundingClientRect();
+        return { top: rect.top, right: rect.right, bottom: rect.bottom, left: rect.left };
+      };
+      return {
+        stats: readBox(".stat-strip"),
+        coach: readBox(".coach-wrap"),
+        pause: readBox("#hud-pause-button")
+      };
+    });
+
+    expect(overlaps(boxes.stats, boxes.coach)).toBe(false);
+    expect(overlaps(boxes.coach, boxes.pause)).toBe(false);
+  });
+}
+
 test("roll cues originate from their named side", () => {
   expect(MOVES.rollRight.entryLane).toBeGreaterThan(0);
   expect(MOVES.rollRight.lane).toBeGreaterThan(0);
@@ -165,4 +238,8 @@ function inspectPixels(buffer) {
   }
 
   return { filled, varied };
+}
+
+function overlaps(a, b) {
+  return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 }

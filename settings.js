@@ -18,7 +18,9 @@ export const gameSettings = {
   trainingFocus: "mixed",
   offenseMode: true,
   defenseMode: true,
-  demoAssist: true
+  demoAssist: true,
+  audioCueMode: false,
+  realisticGloves: false
 };
 
 export const ENVIRONMENTS = ["gym", "livingRoom", "backyard", "garage"];

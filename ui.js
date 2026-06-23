@@ -46,7 +46,9 @@ export class UI {
       trainingFocus: document.querySelector("#training-focus"),
       offenseMode: document.querySelector("#offense-mode"),
       defenseMode: document.querySelector("#defense-mode"),
-      demoAssist: document.querySelector("#demo-assist")
+      demoAssist: document.querySelector("#demo-assist"),
+      audioCueMode: document.querySelector("#audio-cue-mode"),
+      realisticGloves: document.querySelector("#realistic-gloves")
     };
   }
 
@@ -215,7 +217,9 @@ export class UI {
       trainingFocus: this.controls.trainingFocus.value,
       offenseMode: this.controls.offenseMode.checked,
       defenseMode: this.controls.defenseMode.checked,
-      demoAssist: this.controls.demoAssist.checked
+      demoAssist: this.controls.demoAssist.checked,
+      audioCueMode: this.controls.audioCueMode.checked,
+      realisticGloves: this.controls.realisticGloves.checked
     });
     return gameSettings;
   }
@@ -227,7 +231,9 @@ export class UI {
 
   updatePreRoundSummary(settings = gameSettings) {
     const modeLabel = settings.offenseMode && settings.defenseMode ? "mixed offense/defense" : settings.offenseMode ? "offense only" : "defense only";
-    this.preRoundSummary.textContent = `${settings.comboMin}-${settings.comboMax} cue combos, ${modeLabel}, speed ${Number(settings.cueSpeed).toFixed(1)}, rhythm ${Number(settings.rhythm).toFixed(2)}s, ${settings.defensiveFrequency}% defense, ${settings.bodyShotFrequency}% body shots.`;
+    const audioLabel = settings.audioCueMode ? "audio calls on" : "audio calls off";
+    const gloveLabel = settings.realisticGloves ? "realistic gloves" : "labeled cues";
+    this.preRoundSummary.textContent = `${settings.comboMin}-${settings.comboMax} cue combos, ${modeLabel}, speed ${Number(settings.cueSpeed).toFixed(1)}, rhythm ${Number(settings.rhythm).toFixed(2)}s, ${settings.defensiveFrequency}% defense, ${settings.bodyShotFrequency}% body shots, ${audioLabel}, ${gloveLabel}.`;
   }
 
   bindActions(actions) {

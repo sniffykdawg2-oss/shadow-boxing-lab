@@ -352,7 +352,9 @@ export class CueManager {
     const adjustedTargetZ = sideCue ? -1.42 : targetZ;
     const spawnZ = adjustedTargetZ - speed * telegraph;
     const entryLane = definition.entryLane ?? definition.lane;
-    const group = definition.type === "offense" ? createPad(definition) : createDefenseCue(definition);
+    const group = definition.type === "offense"
+      ? createPad(definition, this.settings.realisticGloves)
+      : createDefenseCue(definition, this.settings.realisticGloves);
     group.position.set(entryLane, definition.height, spawnZ);
     group.rotation.set(definition.type === "offense" ? -0.06 : 0, definition.padTurn ?? 0, 0);
     this.scene.add(group);
@@ -571,7 +573,11 @@ function counterAfterDefense(move) {
   return Math.random() < 0.55 ? "cross" : "leadHook";
 }
 
-function createPad(definition) {
+function createPad(definition, realistic = false) {
+  if (realistic) {
+    return createFocusMitt(definition);
+  }
+
   const group = new THREE.Group();
   const padMaterial = new THREE.MeshStandardMaterial({
     color: definition.color,
@@ -613,7 +619,11 @@ function createPad(definition) {
   return group;
 }
 
-function createDefenseCue(definition) {
+function createDefenseCue(definition, realistic = false) {
+  if (realistic) {
+    return createRealisticDefenseCue(definition);
+  }
+
   const group = new THREE.Group();
   const red = new THREE.MeshStandardMaterial({ color: definition.color ?? 0xd84242, roughness: 0.56, metalness: 0.04 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x202326, roughness: 0.8 });
@@ -683,6 +693,110 @@ function createDefenseCue(definition) {
   );
   ring.position.z = 0.16;
   group.add(label, ring);
+  group.userData.warningRing = ring;
+  return group;
+}
+
+function createFocusMitt(definition) {
+  const group = new THREE.Group();
+  const mittMaterial = new THREE.MeshStandardMaterial({
+    color: 0x20252b,
+    roughness: 0.62,
+    metalness: 0.04
+  });
+  const faceMaterial = new THREE.MeshStandardMaterial({
+    color: definition.color,
+    roughness: 0.46,
+    metalness: 0.05,
+    emissive: 0x050505
+  });
+  const leatherTrim = new THREE.MeshStandardMaterial({ color: 0xf1d28a, roughness: 0.54, metalness: 0.05 });
+  const strapMaterial = new THREE.MeshStandardMaterial({ color: 0x090a0c, roughness: 0.88 });
+
+  const back = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.43, 0.12), mittMaterial);
+  back.position.z = -0.03;
+
+  const face = new THREE.Mesh(new THREE.SphereGeometry(0.27, 36, 20), faceMaterial);
+  face.scale.set(1.03, 0.76, 0.26);
+  face.position.z = 0.08;
+
+  const target = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.012, 10, 48), leatherTrim);
+  target.scale.y = 0.78;
+  target.position.z = 0.16;
+
+  const palmCup = new THREE.Mesh(new THREE.SphereGeometry(0.2, 28, 16), mittMaterial);
+  palmCup.scale.set(1, 0.72, 0.22);
+  palmCup.position.z = -0.13;
+
+  const strap = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.055, 0.035), strapMaterial);
+  strap.position.set(0, -0.17, -0.19);
+
+  const wrist = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.064, 0.58, 18), strapMaterial);
+  wrist.rotation.z = definition.hand === "left" ? -0.68 : 0.68;
+  wrist.position.set(definition.hand === "left" ? -0.35 : 0.35, -0.12, -0.33);
+
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(0.44, 0.01, 8, 56),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.14 })
+  );
+  ring.position.z = 0.16;
+
+  group.add(back, face, target, palmCup, strap, wrist, ring);
+  group.userData.warningRing = ring;
+  return group;
+}
+
+function createRealisticDefenseCue(definition) {
+  const group = new THREE.Group();
+  const gloveMaterial = new THREE.MeshStandardMaterial({
+    color: definition.color ?? 0xc93232,
+    roughness: 0.48,
+    metalness: 0.05,
+    emissive: 0x080202
+  });
+  const sleeveMaterial = new THREE.MeshStandardMaterial({ color: 0x15171a, roughness: 0.82 });
+  const sideSign = definition.side === "left" ? -1 : definition.side === "right" ? 1 : definition.lane < 0 ? -1 : 1;
+
+  const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.105, 1.26, 20), sleeveMaterial);
+  const glove = createOpponentGlove(gloveMaterial);
+  const shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.115, 18, 12), sleeveMaterial);
+
+  if (definition.defenseKind === "sidePunch") {
+    arm.rotation.z = Math.PI / 2;
+    arm.rotation.y = sideSign * 0.56;
+    arm.position.set(sideSign * 0.62, definition.level === "body" ? -0.05 : 0.02, -0.08);
+    glove.position.set(sideSign * -0.22, 0, 0.04);
+    glove.rotation.set(0, sideSign * 0.82, sideSign * -0.24);
+    shoulder.position.set(sideSign * 1.34, 0, -0.15);
+  } else if (definition.defenseKind === "rollBar") {
+    arm.rotation.z = sideSign * 1.16;
+    arm.rotation.y = sideSign * 0.22;
+    arm.position.set(sideSign * 0.35, 0.04, -0.15);
+    glove.position.set(sideSign * -0.32, -0.06, 0.04);
+    glove.rotation.set(0.08, sideSign * 0.8, sideSign * -0.6);
+    shoulder.position.set(sideSign * 0.92, 0.28, -0.22);
+  } else if (definition.defenseKind === "bar") {
+    const isDuck = definition.label === "Duck";
+    arm.rotation.z = isDuck ? Math.PI / 2 : sideSign * 0.22;
+    arm.rotation.x = Math.PI / 2;
+    arm.position.set(isDuck ? 0 : sideSign * 0.16, isDuck ? 0.02 : 0, -0.34);
+    glove.position.set(isDuck ? sideSign * 0.64 : 0, isDuck ? 0 : 0.05, 0.08);
+    glove.rotation.set(0.04, sideSign * 0.35, isDuck ? sideSign * 0.14 : sideSign * 0.28);
+    shoulder.position.set(isDuck ? sideSign * 1.18 : sideSign * 0.42, isDuck ? 0.02 : 0, -0.84);
+  } else {
+    arm.rotation.x = Math.PI / 2;
+    arm.position.z = -0.46;
+    glove.position.z = 0.06;
+    shoulder.position.z = -1.04;
+  }
+
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(0.52, 0.01, 8, 56),
+    new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.14 })
+  );
+  ring.position.z = 0.18;
+
+  group.add(arm, glove, shoulder, ring);
   group.userData.warningRing = ring;
   return group;
 }

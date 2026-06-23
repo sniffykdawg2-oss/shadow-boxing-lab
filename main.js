@@ -51,6 +51,7 @@ async function startRound({ keepRoom = false, randomizeRoom = false } = {}) {
   ui.showHud();
   ui.setCoach("Ready");
   ui.setCombo(["jab", "cross"]);
+  world.gloves.setRealisticMode(activeSettings.realisticGloves);
   audio.ensureContext()?.resume();
   state = "countdown";
   await countdown();
@@ -64,6 +65,7 @@ function pauseRound() {
   pauseStartedAt = performance.now() / 1000;
   state = "paused";
   ui.showPause();
+  audio.stopSpeech();
 }
 
 function resumeRound() {
@@ -78,6 +80,7 @@ function resumeRound() {
 function mainMenu() {
   state = "menu";
   cues.stop();
+  audio.stopSpeech();
   ui.showStart();
   ui.hideCountdown();
 }
@@ -94,6 +97,9 @@ async function countdown() {
 function handleCueEvent(event) {
   if (event.type === "combo") {
     ui.setCombo(event.combo);
+    if (activeSettings.audioCueMode) {
+      audio.speakCombo(event.combo, MOVES);
+    }
     stats.combos += 1;
     stats.longestCombo = Math.max(stats.longestCombo, event.combo.length);
   }
@@ -141,6 +147,7 @@ function loop(nowMs) {
     if (remaining <= 0) {
       state = "ended";
       cues.stop();
+      audio.stopSpeech();
       ui.showEnd(stats);
       audio.bell();
     }

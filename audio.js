@@ -2,6 +2,7 @@ export class AudioBus {
   constructor() {
     this.context = null;
     this.enabled = true;
+    this.voice = null;
   }
 
   ensureContext() {
@@ -48,4 +49,42 @@ export class AudioBus {
   cue() {
     this.playTone(620, 0.035, "sine", 0.035);
   }
+
+  speakCombo(combo, moves) {
+    if (!("speechSynthesis" in window) || !combo?.length) {
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    const spokenText = combo.map((move) => spokenCue(moves[move]?.label ?? move)).join(", ");
+    const utterance = new SpeechSynthesisUtterance(spokenText);
+    utterance.rate = 1.08;
+    utterance.pitch = 0.92;
+    utterance.volume = 1;
+
+    const voices = window.speechSynthesis.getVoices();
+    this.voice ??= voices.find((voice) => /english|en-/i.test(`${voice.lang} ${voice.name}`)) ?? voices[0] ?? null;
+    if (this.voice) {
+      utterance.voice = this.voice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  stopSpeech() {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  }
+}
+
+function spokenCue(label) {
+  return label
+    .replace("Lead Hook", "left hook")
+    .replace("Rear Hook", "right hook")
+    .replace("Body Shot", "body shot")
+    .replace("Block Left High", "block left high")
+    .replace("Block Right High", "block right high")
+    .replace("Block Left Body", "block left body")
+    .replace("Block Right Body", "block right body");
 }

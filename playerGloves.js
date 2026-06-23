@@ -18,6 +18,17 @@ const guard = {
   }
 };
 
+const realisticGuard = {
+  left: {
+    position: new THREE.Vector3(-0.4, -0.44, -0.96),
+    rotation: new THREE.Euler(-0.08, -0.1, -0.08)
+  },
+  right: {
+    position: new THREE.Vector3(0.4, -0.44, -0.96),
+    rotation: new THREE.Euler(-0.08, 0.1, 0.08)
+  }
+};
+
 const moveDurations = {
   jab: 0.34,
   cross: 0.38,
@@ -39,6 +50,7 @@ const moveDurations = {
 export class PlayerGloves {
   constructor(camera) {
     this.group = new THREE.Group();
+    this.realisticMode = false;
     this.left = this.createGlove("left");
     this.right = this.createGlove("right");
     this.group.add(this.left.group, this.right.group);
@@ -75,8 +87,23 @@ export class PlayerGloves {
     const seam = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.19, 0.012), gloveMaterials.stitch);
     seam.position.set(0, 0.02, -0.22);
 
-    group.add(knuckle, palm, thumb, cuff, wristWrap, seam);
+    const lace = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.13, 0.016), gloveMaterials.trim);
+    lace.position.set(side === "left" ? -0.045 : 0.045, 0.055, -0.235);
+    lace.rotation.z = side === "left" ? -0.16 : 0.16;
+
+    const fingerRidge = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.008, 8, 32, Math.PI), gloveMaterials.stitch);
+    fingerRidge.position.set(0, 0.08, -0.12);
+    fingerRidge.rotation.set(Math.PI / 2, 0, side === "left" ? -0.08 : 0.08);
+
+    group.add(knuckle, palm, thumb, cuff, wristWrap, seam, lace, fingerRidge);
     return { group, side };
+  }
+
+  setRealisticMode(enabled) {
+    this.realisticMode = enabled;
+    const scale = enabled ? 1.06 : 1;
+    this.left.group.scale.setScalar(scale);
+    this.right.group.scale.setScalar(scale);
   }
 
   setGuard() {
@@ -94,8 +121,8 @@ export class PlayerGloves {
 
   update(delta) {
     const pose = {
-      left: clonePose(guard.left),
-      right: clonePose(guard.right),
+      left: clonePose(this.realisticMode ? realisticGuard.left : guard.left),
+      right: clonePose(this.realisticMode ? realisticGuard.right : guard.right),
       camera: new THREE.Vector3()
     };
 
