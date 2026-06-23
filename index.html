@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadow Boxing Lab</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <canvas id="game-canvas" aria-label="Shadow Boxing Lab 3D training scene"></canvas>
+
+    <section id="hud" class="hud hidden" aria-live="polite">
+      <div class="hud-panel stat-strip">
+        <span><b id="timer">01:00</b><small>Timer</small></span>
+        <span><b id="combo-count">0</b><small>Combos</small></span>
+        <span><b id="cue-count">0</b><small>Cues</small></span>
+        <span><b id="pace-label">Padwork</b><small>Pace</small></span>
+      </div>
+      <div class="coach-wrap">
+        <div id="combo-line" class="combo-line">Guard up</div>
+        <div id="coach-cue" class="coach-cue">Ready</div>
+      </div>
+      <button id="hud-pause-button" class="hud-pause-button">Pause</button>
+    </section>
+
+    <div id="screen-flash" class="screen-flash"></div>
+    <div id="countdown" class="countdown hidden">3</div>
+    <div id="setting-tooltip" class="setting-tooltip hidden" role="tooltip"></div>
+
+    <section id="start-screen" class="overlay start-screen">
+      <div class="title-lockup">
+        <p class="eyebrow">Local reaction training prototype</p>
+        <h1>Shadow Boxing Lab</h1>
+        <p class="subtitle">First-person padwork, defense cues, and customizable rhythm drills for real-life shadowboxing practice.</p>
+      </div>
+
+      <div class="settings-shell">
+        <div class="settings-grid basic-grid">
+          <label>
+            <span class="setting-heading">Difficulty <span class="setting-help" tabindex="0" data-tooltip="Sets the base training pace, forgiveness, and default combo pressure.">i</span></span>
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </label>
+          <label>
+            <span class="setting-heading">Round Length <span class="setting-help" tabindex="0" data-tooltip="Controls how long the training round runs before the summary screen.">i</span></span>
+            <select id="round-length">
+              <option value="60" selected>1 min</option>
+              <option value="120">2 min</option>
+              <option value="180">3 min</option>
+            </select>
+          </label>
+          <label>
+            <span class="setting-heading">Environment <span class="setting-help" tabindex="0" data-tooltip="Chooses the training room, or Random for a different room each new round.">i</span></span>
+            <select id="environment">
+              <option value="random" selected>Random</option>
+              <option value="gym">Boxing Ring / Gym</option>
+              <option value="livingRoom">Living Room</option>
+              <option value="backyard">Backyard</option>
+              <option value="garage">Garage</option>
+            </select>
+          </label>
+        </div>
+
+        <details class="advanced-settings" open>
+          <summary>Advanced Training Settings</summary>
+          <div class="settings-grid advanced-grid">
+            <label>
+              <span class="setting-heading">Combo Length <span class="setting-help" tabindex="0" data-tooltip="Preset range for how many cues appear in each padwork sequence.">i</span></span>
+              <select id="combo-length-preset">
+                <option value="beginner">Beginner 1-2</option>
+                <option value="normal" selected>Normal 2-4</option>
+                <option value="advanced">Advanced 4-7</option>
+                <option value="pro">Pro 6-10</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label>
+              <span class="setting-heading">Min Cues <span class="setting-help" tabindex="0" data-tooltip="Minimum number of punches, blocks, rolls, slips, or ducks in a combo.">i</span></span>
+              <input id="combo-min" type="number" min="1" max="8" value="2" />
+            </label>
+            <label>
+              <span class="setting-heading">Max Cues <span class="setting-help" tabindex="0" data-tooltip="Maximum combo length. Higher values create longer padwork chains when set to Custom.">i</span></span>
+              <input id="combo-max" type="number" min="1" max="12" value="4" />
+            </label>
+            <label>
+              <span class="setting-heading">Cue Speed <span class="setting-help" tabindex="0" data-tooltip="Controls how fast pads, punches, bars, and roll cues travel into range.">i</span></span>
+              <select id="cue-speed-preset">
+                <option value="slow">Slow</option>
+                <option value="normal" selected>Normal</option>
+                <option value="fast">Fast</option>
+                <option value="fight">Fight Pace</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label>
+              <span class="setting-heading">Speed Value <span class="setting-help" tabindex="0" data-tooltip="Custom speed value. Higher speed gives less time to read each cue.">i</span></span>
+              <input id="cue-speed" type="range" min="4" max="12" step="0.25" value="7" />
+            </label>
+            <label>
+              <span class="setting-heading">Combo Rhythm <span class="setting-help" tabindex="0" data-tooltip="Preset spacing between cues inside a combo, from slow drill to chaos pace.">i</span></span>
+              <select id="rhythm-preset">
+                <option value="slow">Slow Drill</option>
+                <option value="padwork" selected>Padwork Rhythm</option>
+                <option value="fast">Fast Hands</option>
+                <option value="chaos">Chaos</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label>
+              <span class="setting-heading">Rhythm Spacing <span class="setting-help" tabindex="0" data-tooltip="Custom delay between cues. Lower values create faster padwork flow.">i</span></span>
+              <input id="rhythm" type="range" min="0.34" max="1.4" step="0.02" value="0.72" />
+            </label>
+            <label>
+              <span class="setting-heading">Defensive Frequency <span id="defense-value">25%</span> <span class="setting-help" tabindex="0" data-tooltip="Controls how often blocks, slips, ducks, rolls, and side-block cues appear.">i</span></span>
+              <input id="defense-frequency" type="range" min="0" max="60" step="1" value="25" />
+            </label>
+            <label>
+              <span class="setting-heading">Body Shot Frequency <span id="body-value">20%</span> <span class="setting-help" tabindex="0" data-tooltip="Controls how often body-level pads and body-side blocks appear.">i</span></span>
+              <input id="body-frequency" type="range" min="0" max="50" step="1" value="20" />
+            </label>
+            <label>
+              <span class="setting-heading">Round Intensity <span class="setting-help" tabindex="0" data-tooltip="Applies a broad training feel: technical, balanced, conditioning, or fight-like pressure.">i</span></span>
+              <select id="intensity">
+                <option value="technical">Technical</option>
+                <option value="balanced" selected>Balanced</option>
+                <option value="conditioning">Conditioning</option>
+                <option value="war">War Mode</option>
+              </select>
+            </label>
+            <label>
+              <span class="setting-heading">Rest Between Combos <span class="setting-help" tabindex="0" data-tooltip="Preset pause after one combo finishes before the next call starts.">i</span></span>
+              <select id="rest-preset">
+                <option value="short">Short</option>
+                <option value="normal" selected>Normal</option>
+                <option value="long">Long</option>
+                <option value="custom">Custom</option>
+              </select>
+            </label>
+            <label>
+              <span class="setting-heading">Rest Value <span class="setting-help" tabindex="0" data-tooltip="Custom rest duration. Lower values keep pressure high between combos.">i</span></span>
+              <input id="rest" type="range" min="0.25" max="2.4" step="0.05" value="1.1" />
+            </label>
+            <label>
+              <span class="setting-heading">Telegraph Time <span class="setting-help" tabindex="0" data-tooltip="Controls how long cues are visible before reaching the reaction moment.">i</span></span>
+              <input id="telegraph" type="range" min="0.45" max="1.8" step="0.05" value="1.05" />
+            </label>
+            <label>
+              <span class="setting-heading">Training Focus <span class="setting-help" tabindex="0" data-tooltip="Biases the combo generator toward certain drills, counters, or defensive patterns.">i</span></span>
+              <select id="training-focus">
+                <option value="mixed" selected>Mixed Boxing</option>
+                <option value="jabCross">Jab/Cross Focus</option>
+                <option value="hooks">Hooks Focus</option>
+                <option value="body">Body Shots Focus</option>
+                <option value="defense">Defense Focus</option>
+                <option value="headMovement">Head Movement Focus</option>
+                <option value="chaos">Conditioning Chaos</option>
+              </select>
+            </label>
+            <label class="toggle-label">
+              <input id="demo-assist" type="checkbox" checked />
+              <span>Coach Glove Demo</span>
+              <span class="setting-help" tabindex="0" data-tooltip="When on, the on-screen gloves demonstrate each punch, block, slip, duck, or roll.">i</span>
+            </label>
+          </div>
+        </details>
+
+        <div id="pre-round-summary" class="pre-round-summary"></div>
+        <button id="play-button" class="primary-button">Play</button>
+      </div>
+    </section>
+
+    <section id="pause-screen" class="overlay compact-overlay hidden">
+      <div class="modal-panel">
+        <p class="eyebrow">Round paused</p>
+        <h2>Stay loose</h2>
+        <div class="button-row">
+          <button id="resume-button">Resume</button>
+          <button id="restart-button">Restart Round</button>
+          <button id="pause-main-menu-button">Main Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="end-screen" class="overlay compact-overlay hidden">
+      <div class="modal-panel summary-panel">
+        <p class="eyebrow">Round complete</p>
+        <h2>Training Summary</h2>
+        <div id="summary-stats" class="summary-stats"></div>
+        <div class="button-row">
+          <button id="replay-button">Replay</button>
+          <button id="new-room-button">New Room</button>
+          <button id="end-main-menu-button">Main Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>
