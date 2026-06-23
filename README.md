@@ -47,3 +47,5 @@ Create a new builder function in `environments.js`, add its key to `ENVIRONMENTS
 ## Training Settings
 
 The start screen settings are read into the central `gameSettings` object, normalized before each round, and used directly by the combo generator and cue scheduler. Manual slider/number changes switch their preset to Custom automatically. Cue speed, rhythm, telegraph time, defensive frequency, body frequency, rest timing, intensity, training focus, and coach glove demo all affect gameplay.
+
+Use `Offense Mode` and `Defense Mode` to filter the workout. Offense-only shows pad targets without defensive cues. Defense-only shows blocks, slips, ducks, rolls, and side punches without offensive pad targets. At least one mode stays enabled.

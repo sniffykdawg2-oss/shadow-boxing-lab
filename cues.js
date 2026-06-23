@@ -436,8 +436,12 @@ function applyFocusVariation(combo, settings, comboCount, targetLength) {
 }
 
 function enforceFrequencies(combo, settings) {
-  if (settings.defensiveFrequency <= 0) {
+  if (settings.defenseMode === false || settings.defensiveFrequency <= 0) {
     combo = combo.filter((move) => !defenseMoves.includes(move));
+  }
+
+  if (settings.offenseMode === false) {
+    combo = combo.filter((move) => !offenseOnly.includes(move));
   }
 
   if (settings.bodyShotFrequency <= 0) {
@@ -445,13 +449,16 @@ function enforceFrequencies(combo, settings) {
   }
 
   const hasBody = combo.includes("bodyShot");
-  const shouldAddBody = settings.bodyShotFrequency > 0 && (Math.random() * 100 < settings.bodyShotFrequency || settings.trainingFocus === "body");
+  const shouldAddBody =
+    settings.offenseMode !== false &&
+    settings.bodyShotFrequency > 0 &&
+    (Math.random() * 100 < settings.bodyShotFrequency || settings.trainingFocus === "body");
   if (!hasBody && shouldAddBody) {
     const insertAt = combo[0] === "jab" ? 1 : Math.min(2, combo.length);
     combo.splice(insertAt, 0, "bodyShot");
   }
 
-  return combo.length ? combo : ["jab"];
+  return combo.length ? combo : [fallbackMove(settings)];
 }
 
 function fitComboLength(combo, settings, targetLength) {
@@ -468,9 +475,14 @@ function fitComboLength(combo, settings, targetLength) {
 
 function nextPadworkFragment(combo, settings, spaceLeft) {
   const last = combo[combo.length - 1];
-  const defenseAllowed = settings.defensiveFrequency > 0 && settings.trainingFocus !== "jabCross";
+  const offenseAllowed = settings.offenseMode !== false;
+  const defenseAllowed = settings.defenseMode !== false && settings.defensiveFrequency > 0 && settings.trainingFocus !== "jabCross";
   const shouldDefend = defenseAllowed && spaceLeft >= 2 && Math.random() * 100 < settings.defensiveFrequency;
   const shouldBody = settings.bodyShotFrequency > 0 && (Math.random() * 100 < settings.bodyShotFrequency || settings.trainingFocus === "body");
+
+  if (!offenseAllowed) {
+    return [pick(defenseMoves)];
+  }
 
   if (shouldDefend) {
     const defense = settings.trainingFocus === "headMovement" ? pick(headMovementMoves) : pick(defenseMoves);
@@ -498,6 +510,13 @@ function nextPadworkFragment(combo, settings, spaceLeft) {
   ];
 
   return pick(fragments).slice(0, spaceLeft);
+}
+
+function fallbackMove(settings) {
+  if (settings.offenseMode === false && settings.defenseMode !== false) {
+    return pick(defenseMoves);
+  }
+  return "jab";
 }
 
 function smoothCombo(combo) {

@@ -16,6 +16,8 @@ export const gameSettings = {
   restBetweenCombos: 0.95,
   telegraphTime: 0.95,
   trainingFocus: "mixed",
+  offenseMode: true,
+  defenseMode: true,
   demoAssist: true
 };
 
@@ -117,9 +119,13 @@ export function normalizeSettings(settings) {
   const intensity = intensityProfiles[settings.intensity] ?? intensityProfiles.balanced;
   const comboMin = clamp(Math.round(settings.comboMin), 1, 8);
   const comboMax = clamp(Math.round(settings.comboMax), comboMin, 12);
+  const offenseMode = settings.offenseMode !== false || settings.defenseMode === false;
+  const defenseMode = settings.defenseMode !== false || settings.offenseMode === false;
 
   return {
     ...settings,
+    offenseMode,
+    defenseMode,
     cueSpeed: clamp(Number(settings.cueSpeed || intensity.cueSpeed), 4, 12),
     rhythm: clamp(Number(settings.rhythm || intensity.rhythm), 0.34, 1.4),
     defensiveFrequency:

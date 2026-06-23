@@ -59,6 +59,15 @@ test("setting info blurbs appear on hover", async ({ page }) => {
   await expect(page.locator("#setting-tooltip")).toContainText("base training pace");
 });
 
+test("mode checkboxes cannot both be disabled", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#offense-mode").uncheck();
+  await expect(page.locator("#offense-mode")).not.toBeChecked();
+  await expect(page.locator("#defense-mode")).toBeChecked();
+  await page.locator("#defense-mode").click();
+  await expect(page.locator("#defense-mode")).toBeChecked();
+});
+
 test("roll cues originate from their named side", () => {
   expect(MOVES.rollRight.entryLane).toBeGreaterThan(0);
   expect(MOVES.rollRight.lane).toBeGreaterThan(0);
@@ -107,6 +116,29 @@ test("settings materially change generated combos", () => {
   const defenseMoves = Array.from({ length: 60 }, (_, index) => generateCombo(defenseSettings, index + 1)).flat();
   expect(defenseMoves.some((move) => ["rollLeft", "rollRight"].includes(move))).toBe(true);
   expect(defenseMoves.some((move) => ["blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody"].includes(move))).toBe(true);
+});
+
+test("offense and defense modes filter cue families", () => {
+  const baseSettings = {
+    comboMin: 8,
+    comboMax: 12,
+    cueSpeed: 6.7,
+    rhythm: 0.64,
+    defensiveFrequency: 60,
+    bodyShotFrequency: 30,
+    intensity: "balanced",
+    trainingFocus: "mixed"
+  };
+  const offensiveMoves = ["jab", "cross", "leadHook", "rearHook", "bodyShot"];
+  const defensiveMoves = ["block", "blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody", "slipLeft", "slipRight", "duck", "rollLeft", "rollRight"];
+
+  const offenseOnly = normalizeSettings({ ...baseSettings, offenseMode: true, defenseMode: false });
+  const offenseCombos = Array.from({ length: 20 }, (_, index) => generateCombo(offenseOnly, index + 1)).flat();
+  expect(offenseCombos.every((move) => offensiveMoves.includes(move))).toBe(true);
+
+  const defenseOnly = normalizeSettings({ ...baseSettings, offenseMode: false, defenseMode: true });
+  const defenseCombos = Array.from({ length: 20 }, (_, index) => generateCombo(defenseOnly, index + 1)).flat();
+  expect(defenseCombos.every((move) => defensiveMoves.includes(move))).toBe(true);
 });
 
 function inspectPixels(buffer) {

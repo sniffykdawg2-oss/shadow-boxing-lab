@@ -44,6 +44,8 @@ export class UI {
       rest: document.querySelector("#rest"),
       telegraph: document.querySelector("#telegraph"),
       trainingFocus: document.querySelector("#training-focus"),
+      offenseMode: document.querySelector("#offense-mode"),
+      defenseMode: document.querySelector("#defense-mode"),
       demoAssist: document.querySelector("#demo-assist")
     };
   }
@@ -70,6 +72,12 @@ export class UI {
     });
     this.controls.rest.addEventListener("input", () => {
       this.controls.restPreset.value = "custom";
+    });
+    this.controls.offenseMode.addEventListener("change", () => {
+      this.keepOneModeEnabled(this.controls.offenseMode);
+    });
+    this.controls.defenseMode.addEventListener("change", () => {
+      this.keepOneModeEnabled(this.controls.defenseMode);
     });
 
     Object.values(this.controls).forEach((control) => {
@@ -124,6 +132,12 @@ export class UI {
 
   hideSettingTooltip() {
     this.settingTooltip.classList.add("hidden");
+  }
+
+  keepOneModeEnabled(changedControl) {
+    if (!this.controls.offenseMode.checked && !this.controls.defenseMode.checked) {
+      changedControl.checked = true;
+    }
   }
 
   applyDifficultyProfile(difficulty) {
@@ -199,6 +213,8 @@ export class UI {
       restBetweenCombos: Number(this.controls.rest.value),
       telegraphTime: Number(this.controls.telegraph.value),
       trainingFocus: this.controls.trainingFocus.value,
+      offenseMode: this.controls.offenseMode.checked,
+      defenseMode: this.controls.defenseMode.checked,
       demoAssist: this.controls.demoAssist.checked
     });
     return gameSettings;
@@ -210,7 +226,8 @@ export class UI {
   }
 
   updatePreRoundSummary(settings = gameSettings) {
-    this.preRoundSummary.textContent = `${settings.comboMin}-${settings.comboMax} cue combos, speed ${Number(settings.cueSpeed).toFixed(1)}, rhythm ${Number(settings.rhythm).toFixed(2)}s, ${settings.defensiveFrequency}% defense, ${settings.bodyShotFrequency}% body shots.`;
+    const modeLabel = settings.offenseMode && settings.defenseMode ? "mixed offense/defense" : settings.offenseMode ? "offense only" : "defense only";
+    this.preRoundSummary.textContent = `${settings.comboMin}-${settings.comboMax} cue combos, ${modeLabel}, speed ${Number(settings.cueSpeed).toFixed(1)}, rhythm ${Number(settings.rhythm).toFixed(2)}s, ${settings.defensiveFrequency}% defense, ${settings.bodyShotFrequency}% body shots.`;
   }
 
   bindActions(actions) {
