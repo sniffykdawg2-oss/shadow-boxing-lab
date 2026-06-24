@@ -248,6 +248,56 @@ input:focus {
   accent-color: var(--gold);
 }
 
+.bias-settings {
+  position: relative;
+  min-height: 42px;
+  align-self: end;
+}
+
+.bias-settings summary {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.bias-settings summary::-webkit-details-marker {
+  display: none;
+}
+
+.bias-settings[open] summary {
+  border-color: var(--teal);
+}
+
+.bias-settings label {
+  position: absolute;
+  right: 0;
+  top: 50px;
+  z-index: 4;
+  width: min(320px, calc(100vw - 44px));
+  padding: 12px;
+  color: var(--muted);
+  background: var(--panel-strong);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+.bias-scale {
+  display: flex;
+  justify-content: space-between;
+  color: #d7e0dd;
+  font-size: 0.68rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
 .pre-round-summary {
   margin: 16px 0;
   min-height: 48px;

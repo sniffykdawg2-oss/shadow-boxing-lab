@@ -208,6 +208,17 @@ export const MOVES = {
     rhythm: 1.18,
     color: 0xeac46a
   },
+  rollBack: {
+    label: "Roll Back",
+    coach: "Roll back!",
+    type: "defense",
+    lane: 0,
+    entryLane: 0,
+    height: 0.66,
+    defenseKind: "rollBack",
+    rhythm: 1.18,
+    color: 0xeac46a
+  },
   pivotLeft: {
     label: "Pivot Left",
     coach: "Pivot left!",
@@ -234,7 +245,7 @@ export const MOVES = {
 
 const offenseOnly = ["jab", "cross", "leadHook", "rearHook", "bodyShot", "rearBodyShot", "leadUppercut", "rearUppercut"];
 const sideBlockMoves = ["blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody"];
-const headMovementMoves = ["slipLeft", "slipRight", "duck", "rollLeft", "rollRight"];
+const headMovementMoves = ["slipLeft", "slipRight", "duck", "rollLeft", "rollRight", "rollBack"];
 const pivotMoves = ["pivotLeft", "pivotRight"];
 const defenseMoves = ["block", ...sideBlockMoves, ...headMovementMoves, ...pivotMoves];
 const comboDefenseMoves = ["block", ...sideBlockMoves, ...headMovementMoves];
@@ -251,6 +262,7 @@ const focusTemplates = {
     ["jab", "cross", "slipRight", "cross"],
     ["blockLeftHead", "cross", "leadHook"],
     ["rollRight", "leadHook", "cross"],
+    ["rollBack", "cross"],
     ["duck", "bodyShot", "leadHook"]
   ],
   jabCross: [
@@ -291,9 +303,11 @@ const focusTemplates = {
     ["blockRightBody", "cross"],
     ["rollLeft", "rearHook"],
     ["rollRight", "leadHook"],
+    ["rollBack", "cross"],
     ["slipLeft", "cross"],
     ["slipRight", "leadHook"],
     ["duck", "bodyShot"],
+    ["rollBack", "cross"],
     ["duck", "rearUppercut"],
     ["block", "cross", "leadHook"],
     ["slipRight", "cross", "leadHook"],
@@ -306,6 +320,7 @@ const focusTemplates = {
     ["duck", "leadUppercut"],
     ["rollLeft", "rearHook"],
     ["rollRight", "leadHook"],
+    ["rollBack", "cross"],
     ["rollLeft", "rearHook", "cross"],
     ["slipLeft", "cross", "leadHook"],
     ["slipRight", "cross", "rollLeft", "rearHook"],
@@ -469,6 +484,7 @@ export function generateCombo(settings, comboCount = 1) {
   combo = fitComboLength(combo, settings, targetLength);
   combo = enforceMoveWeights(combo, settings);
   combo = smoothCombo(combo);
+  combo = limitSameHandRuns(combo, settings);
   combo = enforceMoveWeights(enforceFrequencies(combo, settings), settings).slice(0, targetLength);
   return maybeAddPivot(combo, settings);
 }
@@ -488,10 +504,11 @@ function targetComboLength(settings, comboCount) {
 
 function applyFocusVariation(combo, settings, comboCount, targetLength) {
   const varied = [...combo];
-  const canDefend = settings.defensiveFrequency > 0 && settings.trainingFocus !== "jabCross";
+  const defenseFrequency = biasedDefenseFrequency(settings);
+  const canDefend = defenseFrequency > 0 && settings.trainingFocus !== "jabCross";
   const defenseChance = settings.trainingFocus === "defense" || settings.trainingFocus === "headMovement"
-    ? Math.max(settings.defensiveFrequency, 42)
-    : settings.defensiveFrequency;
+    ? Math.max(defenseFrequency, 42)
+    : defenseFrequency;
 
   if (canDefend && Math.random() * 100 < defenseChance && !varied.some((move) => defenseMoves.includes(move))) {
     const defense = settings.trainingFocus === "headMovement" ? pickWeighted(headMovementMoves, settings) : pickWeighted(comboDefenseMoves, settings);
@@ -577,8 +594,9 @@ function enforceMoveWeights(combo, settings) {
 function nextPadworkFragment(combo, settings, spaceLeft) {
   const last = combo[combo.length - 1];
   const offenseAllowed = settings.offenseMode !== false;
-  const defenseAllowed = settings.defenseMode !== false && settings.defensiveFrequency > 0 && settings.trainingFocus !== "jabCross";
-  const shouldDefend = defenseAllowed && spaceLeft >= 2 && Math.random() * 100 < settings.defensiveFrequency;
+  const defenseFrequency = biasedDefenseFrequency(settings);
+  const defenseAllowed = settings.defenseMode !== false && defenseFrequency > 0 && settings.trainingFocus !== "jabCross";
+  const shouldDefend = defenseAllowed && spaceLeft >= 2 && Math.random() * 100 < defenseFrequency;
   const shouldBody = settings.bodyShotFrequency > 0 && (Math.random() * 100 < settings.bodyShotFrequency || settings.trainingFocus === "body");
 
   if (!offenseAllowed) {
@@ -630,6 +648,51 @@ function smoothCombo(combo) {
     }
     return move;
   }).filter((move) => offenseOnly.includes(move) || defenseMoves.includes(move));
+}
+
+function limitSameHandRuns(combo, settings) {
+  let activeHand = null;
+  let runLength = 0;
+
+  return combo.map((move) => {
+    const hand = moveHand(move);
+    if (!hand) {
+      activeHand = null;
+      runLength = 0;
+      return move;
+    }
+
+    if (hand !== activeHand) {
+      activeHand = hand;
+      runLength = 1;
+      return move;
+    }
+
+    runLength += 1;
+    if (runLength < 4) {
+      return move;
+    }
+
+    const replacement = pickWeighted(
+      offenseOnly.filter((candidate) => moveHand(candidate) && moveHand(candidate) !== hand && moveWeight(candidate, settings) > 0),
+      settings
+    );
+    activeHand = moveHand(replacement) ?? hand;
+    runLength = 1;
+    return replacement;
+  });
+}
+
+function moveHand(move) {
+  return MOVES[move]?.hand ?? null;
+}
+
+function biasedDefenseFrequency(settings) {
+  if (settings.defenseMode === false || settings.offenseMode === false) {
+    return settings.defensiveFrequency;
+  }
+
+  return clamp(settings.defensiveFrequency - Number(settings.attackDefenseBias ?? 0) * 0.45, 0, 90);
 }
 
 function spacingFor(move, nextMove, settings) {
@@ -717,6 +780,9 @@ function moveWeight(move, settings) {
   }
   if (move === "rollLeft" || move === "rollRight") {
     return frequencies.rolls ?? 50;
+  }
+  if (move === "rollBack") {
+    return frequencies.rollBacks ?? 30;
   }
   if (move === "pivotLeft" || move === "pivotRight") {
     return frequencies.pivots ?? 0;
@@ -818,6 +884,20 @@ function createDefenseCue(definition, realistic = false) {
     endCapA.rotation.copy(bar.rotation);
     endCapB.rotation.copy(bar.rotation);
     group.add(bar, endCapA, endCapB);
+  } else if (definition.defenseKind === "rollBack") {
+    const bar = new THREE.Mesh(
+      new THREE.BoxGeometry(2.3, 0.15, 0.16),
+      new THREE.MeshStandardMaterial({
+        color: definition.color,
+        roughness: 0.43,
+        emissive: 0x2a2200
+      })
+    );
+    bar.position.set(0, 0.02, 0);
+    const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.42, 3), bar.material);
+    arrow.rotation.x = Math.PI / 2;
+    arrow.position.set(0, -0.32, 0.16);
+    group.add(bar, arrow);
   } else if (definition.defenseKind === "pivot") {
     const sideSign = definition.side === "left" ? -1 : 1;
     const pivotMaterial = new THREE.MeshStandardMaterial({
@@ -855,7 +935,7 @@ function createDefenseCue(definition, realistic = false) {
     new THREE.PlaneGeometry(0.72, 0.24),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(definition.label), transparent: true })
   );
-  label.position.set(0, definition.defenseKind === "pivot" ? 0.44 : definition.label === "Duck" || definition.defenseKind === "rollBar" ? 0.33 : -0.34, 0.16);
+  label.position.set(0, definition.defenseKind === "pivot" ? 0.44 : definition.label === "Duck" || definition.defenseKind === "rollBar" || definition.defenseKind === "rollBack" ? 0.33 : -0.34, 0.16);
 
   const ring = new THREE.Mesh(
     new THREE.TorusGeometry(0.56, 0.011, 8, 56),
@@ -945,6 +1025,13 @@ function createRealisticDefenseCue(definition) {
     glove.position.set(sideSign * -0.32, -0.06, 0.04);
     glove.rotation.set(0.08, sideSign * 0.8, sideSign * -0.6);
     shoulder.position.set(sideSign * 0.92, 0.28, -0.22);
+  } else if (definition.defenseKind === "rollBack") {
+    arm.rotation.z = Math.PI / 2;
+    arm.rotation.x = Math.PI / 2;
+    arm.position.set(0, 0.04, -0.32);
+    glove.position.set(0, -0.05, 0.08);
+    glove.rotation.set(0.08, 0, 0);
+    shoulder.position.set(0, 0.04, -0.9);
   } else if (definition.defenseKind === "bar") {
     const isDuck = definition.label === "Duck";
     arm.rotation.z = isDuck ? Math.PI / 2 : sideSign * 0.22;

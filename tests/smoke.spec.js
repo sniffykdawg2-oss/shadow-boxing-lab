@@ -151,6 +151,10 @@ test("roll cues originate from their named side", () => {
   expect(MOVES.rollLeft.lane).toBeLessThan(0);
   expect(MOVES.rollLeft.height).toBeGreaterThan(MOVES.duck.height);
   expect(MOVES.rollLeft.side).toBe("left");
+
+  expect(MOVES.rollBack.entryLane).toBe(0);
+  expect(MOVES.rollBack.lane).toBe(0);
+  expect(MOVES.rollBack.height).toBeGreaterThan(MOVES.duck.height);
 });
 
 test("settings materially change generated combos", () => {
@@ -176,7 +180,7 @@ test("settings materially change generated combos", () => {
     bodyShotFrequency: 0
   });
   const offenseOnlyCombos = Array.from({ length: 20 }, (_, index) => generateCombo(offenseOnlySettings, index + 1));
-  expect(offenseOnlyCombos.flat().some((move) => ["block", "blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody", "slipLeft", "slipRight", "duck", "rollLeft", "rollRight"].includes(move))).toBe(false);
+  expect(offenseOnlyCombos.flat().some((move) => ["block", "blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody", "slipLeft", "slipRight", "duck", "rollLeft", "rollRight", "rollBack"].includes(move))).toBe(false);
   expect(offenseOnlyCombos.flat().includes("bodyShot")).toBe(false);
 
   const defenseSettings = normalizeSettings({
@@ -187,8 +191,41 @@ test("settings materially change generated combos", () => {
     trainingFocus: "defense"
   });
   const defenseMoves = Array.from({ length: 60 }, (_, index) => generateCombo(defenseSettings, index + 1)).flat();
-  expect(defenseMoves.some((move) => ["rollLeft", "rollRight"].includes(move))).toBe(true);
+  expect(defenseMoves.some((move) => ["rollLeft", "rollRight", "rollBack"].includes(move))).toBe(true);
   expect(defenseMoves.some((move) => ["blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody"].includes(move))).toBe(true);
+});
+
+test("combo cleanup avoids long same-arm punching runs", () => {
+  const settings = normalizeSettings({
+    comboMin: 8,
+    comboMax: 12,
+    cueSpeed: 6.7,
+    rhythm: 0.64,
+    defensiveFrequency: 0,
+    bodyShotFrequency: 0,
+    intensity: "balanced",
+    trainingFocus: "mixed",
+    moveFrequencies: {
+      jab: 100,
+      cross: 20,
+      leadHook: 100,
+      rearHook: 20,
+      leadUppercut: 100,
+      rearUppercut: 20,
+      bodyShot: 0,
+      rearBodyShot: 0,
+      block: 0,
+      sideBlock: 0,
+      slips: 0,
+      rolls: 0,
+      rollBacks: 0,
+      duck: 0,
+      pivots: 0
+    }
+  });
+
+  const combos = Array.from({ length: 80 }, (_, index) => generateCombo(settings, index + 1));
+  expect(combos.every((combo) => maxSameHandRun(combo) <= 3)).toBe(true);
 });
 
 test("offense and defense modes filter cue families", () => {
@@ -203,7 +240,7 @@ test("offense and defense modes filter cue families", () => {
     trainingFocus: "mixed"
   };
   const offensiveMoves = ["jab", "cross", "leadHook", "rearHook", "bodyShot", "rearBodyShot", "leadUppercut", "rearUppercut"];
-  const defensiveMoves = ["block", "blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody", "slipLeft", "slipRight", "duck", "rollLeft", "rollRight", "pivotLeft", "pivotRight"];
+  const defensiveMoves = ["block", "blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody", "slipLeft", "slipRight", "duck", "rollLeft", "rollRight", "rollBack", "pivotLeft", "pivotRight"];
 
   const offenseOnly = normalizeSettings({ ...baseSettings, offenseMode: true, defenseMode: false });
   const offenseCombos = Array.from({ length: 20 }, (_, index) => generateCombo(offenseOnly, index + 1)).flat();
@@ -238,6 +275,31 @@ function inspectPixels(buffer) {
   }
 
   return { filled, varied };
+}
+
+function maxSameHandRun(combo) {
+  let activeHand = null;
+  let run = 0;
+  let max = 0;
+
+  for (const move of combo) {
+    const hand = MOVES[move]?.hand ?? null;
+    if (!hand) {
+      activeHand = null;
+      run = 0;
+      continue;
+    }
+
+    if (hand === activeHand) {
+      run += 1;
+    } else {
+      activeHand = hand;
+      run = 1;
+    }
+    max = Math.max(max, run);
+  }
+
+  return max;
 }
 
 function overlaps(a, b) {

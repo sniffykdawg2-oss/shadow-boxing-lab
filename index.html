@@ -169,6 +169,14 @@
               <span>Defense Mode</span>
               <span class="setting-help" tabindex="0" data-tooltip="When on, defensive cues like blocks, slips, ducks, rolls, and side punches can appear.">i</span>
             </label>
+            <details class="bias-settings">
+              <summary aria-label="Open attack defense bias settings">⚙</summary>
+              <label>
+                <span class="setting-heading">Mode Bias <span id="mode-bias-value">Balanced</span></span>
+                <span class="bias-scale"><span>Defense</span><span>Attack</span></span>
+                <input id="attack-defense-bias" type="range" min="-100" max="100" step="5" value="0" />
+              </label>
+            </details>
             <label class="toggle-label">
               <input id="demo-assist" type="checkbox" checked />
               <span>Coach Glove Demo</span>
@@ -237,6 +245,10 @@
             <label>
               <span class="setting-heading">Rolls <span id="freq-rolls-value">35%</span></span>
               <input data-move-frequency="rolls" type="range" min="0" max="100" step="1" value="35" />
+            </label>
+            <label>
+              <span class="setting-heading">Roll Backs <span id="freq-rollBacks-value">25%</span></span>
+              <input data-move-frequency="rollBacks" type="range" min="0" max="100" step="1" value="25" />
             </label>
             <label>
               <span class="setting-heading">Ducks <span id="freq-duck-value">35%</span></span>

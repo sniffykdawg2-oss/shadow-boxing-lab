@@ -10,6 +10,7 @@ export const gameSettings = {
   rhythmPreset: "padwork",
   rhythm: 0.64,
   defensiveFrequency: 25,
+  attackDefenseBias: 0,
   bodyShotFrequency: 20,
   moveFrequencies: {
     jab: 80,
@@ -24,6 +25,7 @@ export const gameSettings = {
     sideBlock: 35,
     slips: 45,
     rolls: 35,
+    rollBacks: 25,
     duck: 35,
     pivots: 18
   },
@@ -159,6 +161,7 @@ export function normalizeSettings(settings) {
       Number(settings.defensiveFrequency) <= 0
         ? 0
         : clamp(Number(settings.defensiveFrequency) + intensity.defenseDelta, 0, 60),
+    attackDefenseBias: clamp(Number(settings.attackDefenseBias ?? 0), -100, 100),
     bodyShotFrequency: clamp(Number(settings.bodyShotFrequency), 0, 100),
     restBetweenCombos: clamp(Number(settings.restBetweenCombos || intensity.restBetweenCombos), 0.25, 2.4),
     telegraphTime: clamp(Number(settings.telegraphTime || intensity.telegraphTime), 0.45, 1.8),

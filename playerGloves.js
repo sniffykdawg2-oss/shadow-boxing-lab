@@ -48,6 +48,7 @@ const moveDurations = {
   duck: 0.48,
   rollLeft: 0.58,
   rollRight: 0.58,
+  rollBack: 0.6,
   pivotLeft: 0.62,
   pivotRight: 0.62
 };
@@ -259,6 +260,14 @@ export class PlayerGloves {
       pose.camera.x = 0.19 * arc;
       pose.camera.y = -0.18 * arc;
       pose.camera.z = -0.015 * arc;
+    } else if (move === "rollBack") {
+      const arc = Math.sin(turn * Math.PI);
+      pose.left.position.y -= 0.14 * arc;
+      pose.right.position.y -= 0.14 * arc;
+      pose.left.position.z += 0.08 * arc;
+      pose.right.position.z += 0.08 * arc;
+      pose.camera.y = -0.2 * arc;
+      pose.camera.z = 0.12 * arc;
     } else if (move === "pivotLeft") {
       const arc = Math.sin(turn * Math.PI);
       pose.left.position.x -= 0.2 * arc;

@@ -38,6 +38,7 @@ export class UI {
       rhythmPreset: document.querySelector("#rhythm-preset"),
       rhythm: document.querySelector("#rhythm"),
       defensiveFrequency: document.querySelector("#defense-frequency"),
+      attackDefenseBias: document.querySelector("#attack-defense-bias"),
       bodyShotFrequency: document.querySelector("#body-frequency"),
       intensity: document.querySelector("#intensity"),
       restPreset: document.querySelector("#rest-preset"),
@@ -219,6 +220,7 @@ export class UI {
       rhythmPreset: this.controls.rhythmPreset.value,
       rhythm: Number(this.controls.rhythm.value),
       defensiveFrequency: Number(this.controls.defensiveFrequency.value),
+      attackDefenseBias: Number(this.controls.attackDefenseBias.value),
       bodyShotFrequency: Number(this.controls.bodyShotFrequency.value),
       intensity: this.controls.intensity.value,
       restPreset: this.controls.restPreset.value,
@@ -240,6 +242,7 @@ export class UI {
   updateSettingsLabels() {
     document.querySelector("#defense-value").textContent = `${this.controls.defensiveFrequency.value}%`;
     document.querySelector("#body-value").textContent = `${this.controls.bodyShotFrequency.value}%`;
+    document.querySelector("#mode-bias-value").textContent = modeBiasLabel(Number(this.controls.attackDefenseBias.value));
     Object.entries(this.controls.moveFrequencies).forEach(([move, control]) => {
       const label = document.querySelector(`#freq-${move}-value`);
       if (label) {
@@ -249,7 +252,8 @@ export class UI {
   }
 
   updatePreRoundSummary(settings = gameSettings) {
-    const modeLabel = settings.offenseMode && settings.defenseMode ? "mixed offense/defense" : settings.offenseMode ? "offense only" : "defense only";
+    const biasLabel = modeBiasLabel(Number(settings.attackDefenseBias ?? 0)).toLowerCase();
+    const modeLabel = settings.offenseMode && settings.defenseMode ? `${biasLabel} offense/defense` : settings.offenseMode ? "offense only" : "defense only";
     const audioLabel = settings.audioCueMode ? "audio calls on" : "audio calls off";
     const gloveLabel = settings.realisticGloves ? "realistic gloves" : "labeled cues";
     this.preRoundSummary.textContent = `${settings.comboMin}-${settings.comboMax} cue combos, ${modeLabel}, speed ${Number(settings.cueSpeed).toFixed(1)}, rhythm ${Number(settings.rhythm).toFixed(2)}s, ${settings.defensiveFrequency}% defense, ${settings.bodyShotFrequency}% body shots, ${audioLabel}, ${gloveLabel}.`;
@@ -348,6 +352,22 @@ function paceLabel(settings) {
     return "Drill";
   }
   return "Padwork";
+}
+
+function modeBiasLabel(value) {
+  if (value <= -65) {
+    return "Defense heavy";
+  }
+  if (value <= -25) {
+    return "Defense lean";
+  }
+  if (value >= 65) {
+    return "Attack heavy";
+  }
+  if (value >= 25) {
+    return "Attack lean";
+  }
+  return "Balanced";
 }
 
 function formatTime(seconds) {
