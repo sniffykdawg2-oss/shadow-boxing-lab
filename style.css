@@ -2,8 +2,8 @@
   color-scheme: dark;
   --ink: #f1eadc;
   --muted: #b8afa0;
-  --panel: rgba(18, 17, 15, 0.93);
-  --panel-strong: rgba(12, 11, 10, 0.96);
+  --panel: rgba(26, 19, 12, 0.93);
+  --panel-strong: rgba(18, 13, 8, 0.96);
   --line: rgba(241, 234, 220, 0.18);
   --gold: #d8b766;
   --red: #c94a3f;
@@ -64,6 +64,11 @@ input {
   min-height: 100svh;
   overflow: auto;
   background:
+    repeating-linear-gradient(
+      112deg,
+      rgba(190, 154, 88, 0.08) 0 2px,
+      transparent 2px 10px
+    ),
     linear-gradient(
       0deg,
       transparent 0 30%,
@@ -78,17 +83,17 @@ input {
 }
 
 .start-screen {
-  grid-template-columns: minmax(260px, 430px) minmax(340px, 780px);
-  gap: clamp(18px, 3vw, 42px);
+  grid-template-columns: minmax(220px, 360px) minmax(340px, 780px);
+  gap: clamp(16px, 2.4vw, 34px);
   justify-content: center;
   align-content: start;
 }
 
 .title-lockup {
   width: 100%;
-  max-width: 430px;
+  max-width: 360px;
   align-self: start;
-  padding-top: clamp(10px, 5vh, 58px);
+  padding-top: clamp(8px, 5vh, 52px);
 }
 
 .eyebrow {
@@ -107,11 +112,12 @@ h2 {
 }
 
 h1 {
-  max-width: 11ch;
-  font-size: clamp(3.15rem, 7vw, 6.8rem);
+  max-width: 9ch;
+  font-size: clamp(2.7rem, 5.9vw, 5.55rem);
   text-transform: uppercase;
   letter-spacing: 0;
   text-shadow: 0 3px 0 rgba(0, 0, 0, 0.38);
+  overflow-wrap: normal;
 }
 
 h2 {
@@ -505,7 +511,7 @@ button:hover {
 
   h1 {
     max-width: none;
-    font-size: clamp(3rem, 12vw, 5.4rem);
+    font-size: clamp(2.8rem, 11vw, 4.8rem);
   }
 
   .settings-shell {
@@ -551,7 +557,7 @@ button:hover {
   }
 
   h1 {
-    font-size: clamp(2.35rem, 14vw, 4.2rem);
+    font-size: clamp(2.3rem, 13vw, 3.9rem);
     line-height: 0.94;
   }
 
@@ -665,7 +671,7 @@ button:hover {
   }
 
   h1 {
-    font-size: clamp(2.1rem, 13vw, 3.1rem);
+    font-size: clamp(2rem, 12vw, 2.9rem);
   }
 
   .subtitle {
