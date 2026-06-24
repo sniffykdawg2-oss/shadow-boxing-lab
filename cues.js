@@ -76,7 +76,7 @@ export const MOVES = {
     lane: -0.24,
     height: -0.16,
     padTurn: -0.08,
-    padTilt: -0.56,
+    padTilt: 0.56,
     rhythm: 1.08,
     color: 0x55d86f
   },
@@ -88,7 +88,7 @@ export const MOVES = {
     lane: 0.24,
     height: -0.16,
     padTurn: 0.08,
-    padTilt: -0.56,
+    padTilt: 0.56,
     rhythm: 1.08,
     color: 0x55d86f
   },
@@ -535,7 +535,8 @@ function enforceFrequencies(combo, settings) {
 function maybeAddPivot(combo, settings) {
   const pivotFrequency = moveWeight("pivotLeft", settings) + moveWeight("pivotRight", settings);
   const canPivot = settings.defenseMode !== false && pivotFrequency > 0 && settings.trainingFocus !== "jabCross";
-  if (!canPivot || Math.random() * 100 >= Math.min(100, pivotFrequency / 2)) {
+  const maxLength = clamp(Math.round(settings.comboMax), 1, 12);
+  if (!canPivot || combo.length >= maxLength || Math.random() * 100 >= Math.min(100, pivotFrequency / 2)) {
     return combo;
   }
 
