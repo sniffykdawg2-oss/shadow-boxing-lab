@@ -119,7 +119,7 @@
             </label>
             <label>
               <span class="setting-heading">Body Shot Frequency <span id="body-value">20%</span> <span class="setting-help" tabindex="0" data-tooltip="Controls how often body-level pads and body-side blocks appear.">i</span></span>
-              <input id="body-frequency" type="range" min="0" max="50" step="1" value="20" />
+              <input id="body-frequency" type="range" min="0" max="100" step="1" value="20" />
             </label>
             <label>
               <span class="setting-heading">Round Intensity <span class="setting-help" tabindex="0" data-tooltip="Applies a broad training feel: technical, balanced, conditioning, or fight-like pressure.">i</span></span>
@@ -183,6 +183,68 @@
               <input id="realistic-gloves" type="checkbox" />
               <span>Realistic Gloves</span>
               <span class="setting-help" tabindex="0" data-tooltip="When on, pad targets and incoming punches use realistic boxing mitts and gloves without text labels.">i</span>
+            </label>
+          </div>
+        </details>
+
+        <details class="advanced-settings move-frequency-settings">
+          <summary>Move Frequency Settings</summary>
+          <div class="settings-grid advanced-grid move-frequency-grid">
+            <label>
+              <span class="setting-heading">Jabs <span id="freq-jab-value">80%</span></span>
+              <input data-move-frequency="jab" type="range" min="0" max="100" step="1" value="80" />
+            </label>
+            <label>
+              <span class="setting-heading">Crosses <span id="freq-cross-value">80%</span></span>
+              <input data-move-frequency="cross" type="range" min="0" max="100" step="1" value="80" />
+            </label>
+            <label>
+              <span class="setting-heading">Lead Hooks <span id="freq-leadHook-value">45%</span></span>
+              <input data-move-frequency="leadHook" type="range" min="0" max="100" step="1" value="45" />
+            </label>
+            <label>
+              <span class="setting-heading">Rear Hooks <span id="freq-rearHook-value">35%</span></span>
+              <input data-move-frequency="rearHook" type="range" min="0" max="100" step="1" value="35" />
+            </label>
+            <label>
+              <span class="setting-heading">Left Uppercuts <span id="freq-leadUppercut-value">25%</span></span>
+              <input data-move-frequency="leadUppercut" type="range" min="0" max="100" step="1" value="25" />
+            </label>
+            <label>
+              <span class="setting-heading">Right Uppercuts <span id="freq-rearUppercut-value">25%</span></span>
+              <input data-move-frequency="rearUppercut" type="range" min="0" max="100" step="1" value="25" />
+            </label>
+            <label>
+              <span class="setting-heading">Left Body Shots <span id="freq-bodyShot-value">35%</span></span>
+              <input data-move-frequency="bodyShot" type="range" min="0" max="100" step="1" value="35" />
+            </label>
+            <label>
+              <span class="setting-heading">Right Body Shots <span id="freq-rearBodyShot-value">35%</span></span>
+              <input data-move-frequency="rearBodyShot" type="range" min="0" max="100" step="1" value="35" />
+            </label>
+            <label>
+              <span class="setting-heading">Straight Blocks <span id="freq-block-value">45%</span></span>
+              <input data-move-frequency="block" type="range" min="0" max="100" step="1" value="45" />
+            </label>
+            <label>
+              <span class="setting-heading">Side Blocks <span id="freq-sideBlock-value">35%</span></span>
+              <input data-move-frequency="sideBlock" type="range" min="0" max="100" step="1" value="35" />
+            </label>
+            <label>
+              <span class="setting-heading">Slips <span id="freq-slips-value">45%</span></span>
+              <input data-move-frequency="slips" type="range" min="0" max="100" step="1" value="45" />
+            </label>
+            <label>
+              <span class="setting-heading">Rolls <span id="freq-rolls-value">35%</span></span>
+              <input data-move-frequency="rolls" type="range" min="0" max="100" step="1" value="35" />
+            </label>
+            <label>
+              <span class="setting-heading">Ducks <span id="freq-duck-value">35%</span></span>
+              <input data-move-frequency="duck" type="range" min="0" max="100" step="1" value="35" />
+            </label>
+            <label>
+              <span class="setting-heading">Pivots <span id="freq-pivots-value">18%</span></span>
+              <input data-move-frequency="pivots" type="range" min="0" max="100" step="1" value="18" />
             </label>
           </div>
         </details>

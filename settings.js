@@ -11,6 +11,22 @@ export const gameSettings = {
   rhythm: 0.64,
   defensiveFrequency: 25,
   bodyShotFrequency: 20,
+  moveFrequencies: {
+    jab: 80,
+    cross: 80,
+    leadHook: 45,
+    rearHook: 35,
+    leadUppercut: 25,
+    rearUppercut: 25,
+    bodyShot: 35,
+    rearBodyShot: 35,
+    block: 45,
+    sideBlock: 35,
+    slips: 45,
+    rolls: 35,
+    duck: 35,
+    pivots: 18
+  },
   intensity: "balanced",
   restPreset: "normal",
   restBetweenCombos: 0.95,
@@ -124,17 +140,26 @@ export function normalizeSettings(settings) {
   const offenseMode = settings.offenseMode !== false || settings.defenseMode === false;
   const defenseMode = settings.defenseMode !== false || settings.offenseMode === false;
 
+  const defaultFrequencies = gameSettings.moveFrequencies;
+  const moveFrequencies = Object.fromEntries(
+    Object.entries(defaultFrequencies).map(([move, value]) => [
+      move,
+      clamp(Number(settings.moveFrequencies?.[move] ?? value), 0, 100)
+    ])
+  );
+
   return {
     ...settings,
     offenseMode,
     defenseMode,
+    moveFrequencies,
     cueSpeed: clamp(Number(settings.cueSpeed || intensity.cueSpeed), 4, 12),
     rhythm: clamp(Number(settings.rhythm || intensity.rhythm), 0.34, 1.4),
     defensiveFrequency:
       Number(settings.defensiveFrequency) <= 0
         ? 0
         : clamp(Number(settings.defensiveFrequency) + intensity.defenseDelta, 0, 60),
-    bodyShotFrequency: clamp(Number(settings.bodyShotFrequency), 0, 50),
+    bodyShotFrequency: clamp(Number(settings.bodyShotFrequency), 0, 100),
     restBetweenCombos: clamp(Number(settings.restBetweenCombos || intensity.restBetweenCombos), 0.25, 2.4),
     telegraphTime: clamp(Number(settings.telegraphTime || intensity.telegraphTime), 0.45, 1.8),
     comboMin: clamp(comboMin + Math.min(0, intensity.comboDelta), 1, 8),

@@ -48,7 +48,10 @@ export class UI {
       defenseMode: document.querySelector("#defense-mode"),
       demoAssist: document.querySelector("#demo-assist"),
       audioCueMode: document.querySelector("#audio-cue-mode"),
-      realisticGloves: document.querySelector("#realistic-gloves")
+      realisticGloves: document.querySelector("#realistic-gloves"),
+      moveFrequencies: Object.fromEntries(
+        [...document.querySelectorAll("[data-move-frequency]")].map((control) => [control.dataset.moveFrequency, control])
+      )
     };
   }
 
@@ -82,7 +85,14 @@ export class UI {
       this.keepOneModeEnabled(this.controls.defenseMode);
     });
 
-    Object.values(this.controls).forEach((control) => {
+    Object.entries(this.controls).forEach(([key, control]) => {
+      if (key === "moveFrequencies") {
+        return;
+      }
+      control.addEventListener("input", update);
+      control.addEventListener("change", update);
+    });
+    Object.values(this.controls.moveFrequencies).forEach((control) => {
       control.addEventListener("input", update);
       control.addEventListener("change", update);
     });
@@ -215,6 +225,9 @@ export class UI {
       restBetweenCombos: Number(this.controls.rest.value),
       telegraphTime: Number(this.controls.telegraph.value),
       trainingFocus: this.controls.trainingFocus.value,
+      moveFrequencies: Object.fromEntries(
+        Object.entries(this.controls.moveFrequencies).map(([move, control]) => [move, Number(control.value)])
+      ),
       offenseMode: this.controls.offenseMode.checked,
       defenseMode: this.controls.defenseMode.checked,
       demoAssist: this.controls.demoAssist.checked,
@@ -227,6 +240,12 @@ export class UI {
   updateSettingsLabels() {
     document.querySelector("#defense-value").textContent = `${this.controls.defensiveFrequency.value}%`;
     document.querySelector("#body-value").textContent = `${this.controls.bodyShotFrequency.value}%`;
+    Object.entries(this.controls.moveFrequencies).forEach(([move, control]) => {
+      const label = document.querySelector(`#freq-${move}-value`);
+      if (label) {
+        label.textContent = `${control.value}%`;
+      }
+    });
   }
 
   updatePreRoundSummary(settings = gameSettings) {

@@ -202,8 +202,8 @@ test("offense and defense modes filter cue families", () => {
     intensity: "balanced",
     trainingFocus: "mixed"
   };
-  const offensiveMoves = ["jab", "cross", "leadHook", "rearHook", "bodyShot"];
-  const defensiveMoves = ["block", "blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody", "slipLeft", "slipRight", "duck", "rollLeft", "rollRight"];
+  const offensiveMoves = ["jab", "cross", "leadHook", "rearHook", "bodyShot", "rearBodyShot", "leadUppercut", "rearUppercut"];
+  const defensiveMoves = ["block", "blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody", "slipLeft", "slipRight", "duck", "rollLeft", "rollRight", "pivotLeft", "pivotRight"];
 
   const offenseOnly = normalizeSettings({ ...baseSettings, offenseMode: true, defenseMode: false });
   const offenseCombos = Array.from({ length: 20 }, (_, index) => generateCombo(offenseOnly, index + 1)).flat();

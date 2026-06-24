@@ -111,10 +111,10 @@ function handleCueEvent(event) {
     } else {
       stats.defense += 1;
     }
-    if (event.cue.move === "bodyShot" || event.cue.definition.level === "body") {
+    if (event.cue.move === "bodyShot" || event.cue.move === "rearBodyShot" || event.cue.definition.level === "body") {
       stats.bodyShots += 1;
     }
-    if (["slipLeft", "slipRight", "duck", "rollLeft", "rollRight"].includes(event.cue.move)) {
+    if (["slipLeft", "slipRight", "duck", "rollLeft", "rollRight", "pivotLeft", "pivotRight"].includes(event.cue.move)) {
       stats.headMovement += 1;
     }
     audio.cue();

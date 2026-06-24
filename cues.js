@@ -47,8 +47,8 @@ export const MOVES = {
     color: 0x8fb6ff
   },
   bodyShot: {
-    label: "Body Shot",
-    coach: "Body shot!",
+    label: "Left Body",
+    coach: "Left body!",
     type: "offense",
     hand: "left",
     lane: -0.18,
@@ -56,6 +56,41 @@ export const MOVES = {
     padTurn: -0.12,
     rhythm: 1.04,
     color: 0x55d6be
+  },
+  rearBodyShot: {
+    label: "Right Body",
+    coach: "Right body!",
+    type: "offense",
+    hand: "right",
+    lane: 0.18,
+    height: -0.56,
+    padTurn: 0.12,
+    rhythm: 1.04,
+    color: 0x47c7df
+  },
+  leadUppercut: {
+    label: "Left Uppercut",
+    coach: "Left uppercut!",
+    type: "offense",
+    hand: "left",
+    lane: -0.24,
+    height: -0.16,
+    padTurn: -0.08,
+    padTilt: -0.56,
+    rhythm: 1.08,
+    color: 0x55d86f
+  },
+  rearUppercut: {
+    label: "Right Uppercut",
+    coach: "Right uppercut!",
+    type: "offense",
+    hand: "right",
+    lane: 0.24,
+    height: -0.16,
+    padTurn: 0.08,
+    padTilt: -0.56,
+    rhythm: 1.08,
+    color: 0x55d86f
   },
   block: {
     label: "Block",
@@ -172,14 +207,38 @@ export const MOVES = {
     side: "right",
     rhythm: 1.18,
     color: 0xeac46a
+  },
+  pivotLeft: {
+    label: "Pivot Left",
+    coach: "Pivot left!",
+    type: "defense",
+    lane: -0.28,
+    height: 0.08,
+    defenseKind: "pivot",
+    side: "left",
+    rhythm: 1.24,
+    color: 0x55d6be
+  },
+  pivotRight: {
+    label: "Pivot Right",
+    coach: "Pivot right!",
+    type: "defense",
+    lane: 0.28,
+    height: 0.08,
+    defenseKind: "pivot",
+    side: "right",
+    rhythm: 1.24,
+    color: 0x55d6be
   }
 };
 
-const offenseOnly = ["jab", "cross", "leadHook", "rearHook", "bodyShot"];
+const offenseOnly = ["jab", "cross", "leadHook", "rearHook", "bodyShot", "rearBodyShot", "leadUppercut", "rearUppercut"];
 const sideBlockMoves = ["blockLeftHead", "blockRightHead", "blockLeftBody", "blockRightBody"];
 const headMovementMoves = ["slipLeft", "slipRight", "duck", "rollLeft", "rollRight"];
-const defenseMoves = ["block", ...sideBlockMoves, ...headMovementMoves];
-const counterStarters = ["jab", "cross", "leadHook", "bodyShot"];
+const pivotMoves = ["pivotLeft", "pivotRight"];
+const defenseMoves = ["block", ...sideBlockMoves, ...headMovementMoves, ...pivotMoves];
+const comboDefenseMoves = ["block", ...sideBlockMoves, ...headMovementMoves];
+const counterStarters = ["jab", "cross", "leadHook", "bodyShot", "rearBodyShot", "leadUppercut", "rearUppercut"];
 const focusTemplates = {
   mixed: [
     ["jab"],
@@ -187,6 +246,8 @@ const focusTemplates = {
     ["jab", "cross", "leadHook"],
     ["jab", "cross", "leadHook", "cross"],
     ["jab", "bodyShot", "cross"],
+    ["jab", "rearBodyShot", "leadHook"],
+    ["jab", "leadUppercut", "cross"],
     ["jab", "cross", "slipRight", "cross"],
     ["blockLeftHead", "cross", "leadHook"],
     ["rollRight", "leadHook", "cross"],
@@ -207,17 +268,20 @@ const focusTemplates = {
     ["jab", "cross", "leadHook"],
     ["leadHook", "rearHook"],
     ["jab", "leadHook", "cross"],
+    ["cross", "rearUppercut", "leadHook"],
     ["rollLeft", "rearHook", "leadHook"],
     ["bodyShot", "leadHook", "rearHook"]
   ],
   body: [
     ["jab", "bodyShot"],
     ["jab", "bodyShot", "cross"],
+    ["cross", "rearBodyShot", "leadHook"],
     ["cross", "bodyShot", "leadHook"],
     ["duck", "bodyShot", "leadHook"],
     ["blockLeftBody", "bodyShot", "cross"],
+    ["blockRightBody", "rearBodyShot", "leadHook"],
     ["jab", "cross", "bodyShot", "leadHook"],
-    ["bodyShot", "bodyShot", "leadHook"]
+    ["bodyShot", "rearBodyShot", "leadHook"]
   ],
   defense: [
     ["block", "cross"],
@@ -230,6 +294,7 @@ const focusTemplates = {
     ["slipLeft", "cross"],
     ["slipRight", "leadHook"],
     ["duck", "bodyShot"],
+    ["duck", "rearUppercut"],
     ["block", "cross", "leadHook"],
     ["slipRight", "cross", "leadHook"],
     ["duck", "bodyShot", "cross"]
@@ -238,6 +303,7 @@ const focusTemplates = {
     ["slipLeft", "cross"],
     ["slipRight", "leadHook"],
     ["duck", "bodyShot"],
+    ["duck", "leadUppercut"],
     ["rollLeft", "rearHook"],
     ["rollRight", "leadHook"],
     ["rollLeft", "rearHook", "cross"],
@@ -248,10 +314,11 @@ const focusTemplates = {
   chaos: [
     ["jab", "cross", "leadHook", "rearHook"],
     ["jab", "bodyShot", "cross", "leadHook"],
+    ["jab", "leadUppercut", "cross", "rearUppercut"],
     ["slipRight", "cross", "leadHook", "rearHook"],
     ["blockRightHead", "cross", "duck", "bodyShot", "leadHook"],
     ["jab", "cross", "rollRight", "leadHook", "cross"],
-    ["duck", "bodyShot", "bodyShot", "leadHook", "rearHook"]
+    ["duck", "bodyShot", "rearBodyShot", "leadHook", "rearHook"]
   ]
 };
 
@@ -354,9 +421,9 @@ export class CueManager {
     const entryLane = definition.entryLane ?? definition.lane;
     const group = definition.type === "offense"
       ? createPad(definition, this.settings.realisticGloves)
-      : createDefenseCue(definition, this.settings.realisticGloves);
+      : createDefenseCue(definition, definition.defenseKind === "pivot" ? false : this.settings.realisticGloves);
     group.position.set(entryLane, definition.height, spawnZ);
-    group.rotation.set(definition.type === "offense" ? -0.06 : 0, definition.padTurn ?? 0, 0);
+    group.rotation.set(definition.type === "offense" ? (definition.padTilt ?? -0.06) : 0, definition.padTurn ?? 0, 0);
     this.scene.add(group);
 
     this.activeCues.push({
@@ -400,8 +467,10 @@ export function generateCombo(settings, comboCount = 1) {
   combo = applyFocusVariation(combo, settings, comboCount, targetLength);
   combo = enforceFrequencies(combo, settings);
   combo = fitComboLength(combo, settings, targetLength);
+  combo = enforceMoveWeights(combo, settings);
   combo = smoothCombo(combo);
-  return enforceFrequencies(combo, settings).slice(0, targetLength);
+  combo = enforceMoveWeights(enforceFrequencies(combo, settings), settings).slice(0, targetLength);
+  return maybeAddPivot(combo, settings);
 }
 
 function targetComboLength(settings, comboCount) {
@@ -425,13 +494,13 @@ function applyFocusVariation(combo, settings, comboCount, targetLength) {
     : settings.defensiveFrequency;
 
   if (canDefend && Math.random() * 100 < defenseChance && !varied.some((move) => defenseMoves.includes(move))) {
-    const defense = settings.trainingFocus === "headMovement" ? pick(headMovementMoves) : pick(defenseMoves);
+    const defense = settings.trainingFocus === "headMovement" ? pickWeighted(headMovementMoves, settings) : pickWeighted(comboDefenseMoves, settings);
     const insertAt = clamp(Math.floor(varied.length / 2), 0, varied.length);
     varied.splice(insertAt, 0, defense, counterAfterDefense(defense));
   }
 
   if ((settings.trainingFocus === "chaos" || comboCount % 5 === 0) && varied.length < targetLength) {
-    varied.push(pick(["cross", "leadHook", "bodyShot"]));
+    varied.push(pickWeighted(["cross", "leadHook", "bodyShot", "rearBodyShot", "leadUppercut", "rearUppercut"], settings));
   }
 
   return varied;
@@ -447,20 +516,30 @@ function enforceFrequencies(combo, settings) {
   }
 
   if (settings.bodyShotFrequency <= 0) {
-    combo = combo.map((move, index) => move === "bodyShot" ? (index % 2 === 0 ? "jab" : "cross") : move);
+    combo = combo.map((move, index) => move === "bodyShot" || move === "rearBodyShot" ? (index % 2 === 0 ? "jab" : "cross") : move);
   }
 
-  const hasBody = combo.includes("bodyShot");
+  const hasBody = combo.includes("bodyShot") || combo.includes("rearBodyShot");
   const shouldAddBody =
     settings.offenseMode !== false &&
     settings.bodyShotFrequency > 0 &&
     (Math.random() * 100 < settings.bodyShotFrequency || settings.trainingFocus === "body");
   if (!hasBody && shouldAddBody) {
     const insertAt = combo[0] === "jab" ? 1 : Math.min(2, combo.length);
-    combo.splice(insertAt, 0, "bodyShot");
+    combo.splice(insertAt, 0, pickWeighted(["bodyShot", "rearBodyShot"], settings));
   }
 
   return combo.length ? combo : [fallbackMove(settings)];
+}
+
+function maybeAddPivot(combo, settings) {
+  const pivotFrequency = moveWeight("pivotLeft", settings) + moveWeight("pivotRight", settings);
+  const canPivot = settings.defenseMode !== false && pivotFrequency > 0 && settings.trainingFocus !== "jabCross";
+  if (!canPivot || Math.random() * 100 >= Math.min(100, pivotFrequency / 2)) {
+    return combo;
+  }
+
+  return [...combo, pickWeighted(pivotMoves, settings)];
 }
 
 function fitComboLength(combo, settings, targetLength) {
@@ -475,6 +554,25 @@ function fitComboLength(combo, settings, targetLength) {
   return combo;
 }
 
+function enforceMoveWeights(combo, settings) {
+  return combo.map((move) => {
+    if (moveWeight(move, settings) > 0) {
+      return move;
+    }
+
+    if (offenseOnly.includes(move)) {
+      return pickWeighted(offenseOnly.filter((candidate) => moveWeight(candidate, settings) > 0), settings);
+    }
+
+    if (comboDefenseMoves.includes(move)) {
+      return pickWeighted(comboDefenseMoves.filter((candidate) => moveWeight(candidate, settings) > 0), settings);
+    }
+
+    return move;
+  });
+}
+
+
 function nextPadworkFragment(combo, settings, spaceLeft) {
   const last = combo[combo.length - 1];
   const offenseAllowed = settings.offenseMode !== false;
@@ -483,11 +581,11 @@ function nextPadworkFragment(combo, settings, spaceLeft) {
   const shouldBody = settings.bodyShotFrequency > 0 && (Math.random() * 100 < settings.bodyShotFrequency || settings.trainingFocus === "body");
 
   if (!offenseAllowed) {
-    return [pick(defenseMoves)];
+    return [pickWeighted(comboDefenseMoves, settings)];
   }
 
   if (shouldDefend) {
-    const defense = settings.trainingFocus === "headMovement" ? pick(headMovementMoves) : pick(defenseMoves);
+    const defense = settings.trainingFocus === "headMovement" ? pickWeighted(headMovementMoves, settings) : pickWeighted(comboDefenseMoves, settings);
     return [defense, counterAfterDefense(defense)];
   }
 
@@ -496,11 +594,11 @@ function nextPadworkFragment(combo, settings, spaceLeft) {
   }
 
   if (settings.trainingFocus === "hooks") {
-    return last === "leadHook" ? ["rearHook"] : ["jab", "leadHook"].slice(0, spaceLeft);
+    return last === "leadHook" ? ["rearHook"] : ["jab", pickWeighted(["leadHook", "rearHook", "leadUppercut", "rearUppercut"], settings)].slice(0, spaceLeft);
   }
 
-  if (shouldBody && last !== "bodyShot") {
-    return ["bodyShot", pick(["cross", "leadHook"])].slice(0, spaceLeft);
+  if (shouldBody && last !== "bodyShot" && last !== "rearBodyShot") {
+    return [pickWeighted(["bodyShot", "rearBodyShot"], settings), pickWeighted(["cross", "leadHook", "rearHook", "leadUppercut", "rearUppercut"], settings)].slice(0, spaceLeft);
   }
 
   const fragments = [
@@ -508,23 +606,25 @@ function nextPadworkFragment(combo, settings, spaceLeft) {
     ["jab", "cross", "leadHook"],
     ["cross", "leadHook"],
     ["jab", "bodyShot", "cross"],
+    ["cross", "rearBodyShot", "leadHook"],
+    ["jab", "leadUppercut", "cross"],
     ["leadHook", "rearHook"]
   ];
 
-  return pick(fragments).slice(0, spaceLeft);
+  return pick(fragments).map((move) => weightedVariant(move, settings)).slice(0, spaceLeft);
 }
 
 function fallbackMove(settings) {
   if (settings.offenseMode === false && settings.defenseMode !== false) {
-    return pick(defenseMoves);
+    return pickWeighted(comboDefenseMoves, settings);
   }
-  return "jab";
+  return pickWeighted(offenseOnly, settings);
 }
 
 function smoothCombo(combo) {
   return combo.map((move, index) => {
     const previous = combo[index - 1];
-    if (move === previous && move !== "jab" && move !== "bodyShot") {
+    if (move === previous && move !== "jab" && move !== "bodyShot" && move !== "rearBodyShot") {
       return defenseMoves.includes(move) ? counterAfterDefense(move) : move === "leadHook" ? "cross" : "jab";
     }
     return move;
@@ -542,8 +642,11 @@ function spacingFor(move, nextMove, settings) {
   if (definition.type === "defense" && nextDefinition?.type === "offense") {
     spacing *= 0.74;
   }
-  if (move === "bodyShot" || nextMove === "bodyShot") {
+  if (move === "bodyShot" || move === "rearBodyShot" || nextMove === "bodyShot" || nextMove === "rearBodyShot") {
     spacing *= 1.05;
+  }
+  if (move === "pivotLeft" || move === "pivotRight") {
+    spacing *= 1.16;
   }
 
   return clamp(spacing, 0.28, 1.28);
@@ -571,6 +674,53 @@ function counterAfterDefense(move) {
     return Math.random() < 0.55 ? "bodyShot" : "leadHook";
   }
   return Math.random() < 0.55 ? "cross" : "leadHook";
+}
+
+function weightedVariant(move, settings) {
+  if (move === "bodyShot") {
+    return pickWeighted(["bodyShot", "rearBodyShot"], settings);
+  }
+  if (move === "leadHook") {
+    return pickWeighted(["leadHook", "rearHook", "leadUppercut", "rearUppercut"], settings);
+  }
+  return move;
+}
+
+function pickWeighted(items, settings) {
+  if (!items.length) {
+    return fallbackMove(settings);
+  }
+  const weighted = items.map((move) => ({ move, weight: moveWeight(move, settings) }));
+  const total = weighted.reduce((sum, item) => sum + item.weight, 0);
+  if (total <= 0) {
+    return pick(items);
+  }
+
+  let needle = Math.random() * total;
+  for (const item of weighted) {
+    needle -= item.weight;
+    if (needle <= 0) {
+      return item.move;
+    }
+  }
+  return weighted[weighted.length - 1].move;
+}
+
+function moveWeight(move, settings) {
+  const frequencies = settings.moveFrequencies ?? {};
+  if (move === "blockLeftHead" || move === "blockRightHead" || move === "blockLeftBody" || move === "blockRightBody") {
+    return frequencies.sideBlock ?? 50;
+  }
+  if (move === "slipLeft" || move === "slipRight") {
+    return frequencies.slips ?? 50;
+  }
+  if (move === "rollLeft" || move === "rollRight") {
+    return frequencies.rolls ?? 50;
+  }
+  if (move === "pivotLeft" || move === "pivotRight") {
+    return frequencies.pivots ?? 0;
+  }
+  return frequencies[move] ?? 50;
 }
 
 function createPad(definition, realistic = false) {
@@ -667,6 +817,25 @@ function createDefenseCue(definition, realistic = false) {
     endCapA.rotation.copy(bar.rotation);
     endCapB.rotation.copy(bar.rotation);
     group.add(bar, endCapA, endCapB);
+  } else if (definition.defenseKind === "pivot") {
+    const sideSign = definition.side === "left" ? -1 : 1;
+    const pivotMaterial = new THREE.MeshStandardMaterial({
+      color: definition.color,
+      roughness: 0.4,
+      emissive: 0x09201c
+    });
+    const arrow = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.46, 3), pivotMaterial);
+    arrow.rotation.z = sideSign > 0 ? -Math.PI / 2 : Math.PI / 2;
+    arrow.position.x = sideSign * 0.54;
+    const line = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.1, 0.1), pivotMaterial);
+    line.position.x = sideSign * 0.1;
+    const platform = new THREE.Mesh(
+      new THREE.TorusGeometry(0.46, 0.018, 10, 56, Math.PI * 1.35),
+      pivotMaterial
+    );
+    platform.rotation.z = sideSign > 0 ? -0.7 : 2.44;
+    platform.position.y = -0.2;
+    group.add(arrow, line, platform);
   } else {
     const isDuck = definition.label === "Duck";
     const bar = new THREE.Mesh(
@@ -685,7 +854,7 @@ function createDefenseCue(definition, realistic = false) {
     new THREE.PlaneGeometry(0.72, 0.24),
     new THREE.MeshBasicMaterial({ map: makeLabelTexture(definition.label), transparent: true })
   );
-  label.position.set(0, definition.label === "Duck" || definition.defenseKind === "rollBar" ? 0.33 : -0.34, 0.16);
+  label.position.set(0, definition.defenseKind === "pivot" ? 0.44 : definition.label === "Duck" || definition.defenseKind === "rollBar" ? 0.33 : -0.34, 0.16);
 
   const ring = new THREE.Mesh(
     new THREE.TorusGeometry(0.56, 0.011, 8, 56),

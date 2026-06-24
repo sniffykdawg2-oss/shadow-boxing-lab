@@ -35,6 +35,9 @@ const moveDurations = {
   leadHook: 0.44,
   rearHook: 0.46,
   bodyShot: 0.42,
+  rearBodyShot: 0.42,
+  leadUppercut: 0.46,
+  rearUppercut: 0.48,
   block: 0.44,
   blockLeftHead: 0.44,
   blockRightHead: 0.44,
@@ -44,7 +47,9 @@ const moveDurations = {
   slipRight: 0.42,
   duck: 0.48,
   rollLeft: 0.58,
-  rollRight: 0.58
+  rollRight: 0.58,
+  pivotLeft: 0.62,
+  pivotRight: 0.62
 };
 
 export class PlayerGloves {
@@ -173,6 +178,24 @@ export class PlayerGloves {
       pose.right.position.set(0.32, -0.55, -1.04);
       pose.camera.y = -0.07 * recoil;
       pose.camera.x = 0.012 * recoil;
+    } else if (move === "rearBodyShot") {
+      pose.right.position.set(0.1, -0.78, -1.62);
+      pose.right.rotation.set(0.14, 0.2, 0.38 * recoil);
+      pose.left.position.set(-0.32, -0.55, -1.04);
+      pose.camera.y = -0.07 * recoil;
+      pose.camera.x = -0.012 * recoil;
+    } else if (move === "leadUppercut") {
+      pose.left.position.set(-0.08, -0.48 + 0.16 * recoil, -1.55);
+      pose.left.rotation.set(-0.46 * recoil, -0.08, -0.24 * recoil);
+      pose.right.position.x += 0.04 * recoil;
+      pose.camera.y = 0.035 * recoil;
+      pose.camera.x = 0.018 * recoil;
+    } else if (move === "rearUppercut") {
+      pose.right.position.set(0.08, -0.48 + 0.16 * recoil, -1.62);
+      pose.right.rotation.set(-0.48 * recoil, 0.08, 0.24 * recoil);
+      pose.left.position.x -= 0.04 * recoil;
+      pose.camera.y = 0.035 * recoil;
+      pose.camera.x = -0.018 * recoil;
     } else if (move === "block") {
       pose.left.position.set(-0.18, -0.24, -0.78);
       pose.right.position.set(0.18, -0.24, -0.78);
@@ -236,6 +259,22 @@ export class PlayerGloves {
       pose.camera.x = 0.19 * arc;
       pose.camera.y = -0.18 * arc;
       pose.camera.z = -0.015 * arc;
+    } else if (move === "pivotLeft") {
+      const arc = Math.sin(turn * Math.PI);
+      pose.left.position.x -= 0.2 * arc;
+      pose.right.position.x -= 0.14 * arc;
+      pose.left.rotation.z -= 0.28 * arc;
+      pose.right.rotation.z -= 0.2 * arc;
+      pose.camera.x = -0.22 * arc;
+      pose.camera.z = -0.04 * arc;
+    } else if (move === "pivotRight") {
+      const arc = Math.sin(turn * Math.PI);
+      pose.left.position.x += 0.14 * arc;
+      pose.right.position.x += 0.2 * arc;
+      pose.left.rotation.z += 0.2 * arc;
+      pose.right.rotation.z += 0.28 * arc;
+      pose.camera.x = 0.22 * arc;
+      pose.camera.z = -0.04 * arc;
     }
   }
 
