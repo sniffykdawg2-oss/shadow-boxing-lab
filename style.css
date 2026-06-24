@@ -1,14 +1,14 @@
 :root {
   color-scheme: dark;
-  --ink: #f7f4ea;
-  --muted: #a8b7bd;
-  --panel: rgba(13, 18, 23, 0.74);
-  --panel-strong: rgba(9, 12, 16, 0.92);
-  --line: rgba(255, 255, 255, 0.16);
-  --gold: #eac46a;
-  --red: #e14f4f;
-  --teal: #55d6be;
-  --blue: #72a7ff;
+  --ink: #f1eadc;
+  --muted: #b8afa0;
+  --panel: rgba(18, 17, 15, 0.93);
+  --panel-strong: rgba(12, 11, 10, 0.96);
+  --line: rgba(241, 234, 220, 0.18);
+  --gold: #d8b766;
+  --red: #c94a3f;
+  --teal: #7cae9b;
+  --blue: #8ea9c9;
   --hud-mobile-top-clearance: 78px;
 }
 
@@ -22,7 +22,7 @@ body {
   height: 100%;
   margin: 0;
   overflow: hidden;
-  background: #05070a;
+  background: #090806;
   color: var(--ink);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -64,28 +64,39 @@ input {
   min-height: 100svh;
   overflow: auto;
   background:
-    linear-gradient(90deg, rgba(5, 7, 10, 0.82), rgba(5, 7, 10, 0.48)),
-    linear-gradient(0deg, rgba(5, 7, 10, 0.4), rgba(5, 7, 10, 0.1));
+    linear-gradient(
+      0deg,
+      transparent 0 30%,
+      rgba(108, 24, 20, 0.24) 30% 31%,
+      transparent 31% 48%,
+      rgba(108, 24, 20, 0.2) 48% 49%,
+      transparent 49% 66%,
+      rgba(108, 24, 20, 0.18) 66% 67%,
+      transparent 67%
+    ),
+    rgba(18, 13, 5, 0.54);
 }
 
 .start-screen {
-  grid-template-columns: minmax(280px, 560px) minmax(320px, 760px);
-  gap: clamp(22px, 4vw, 56px);
+  grid-template-columns: minmax(260px, 430px) minmax(340px, 780px);
+  gap: clamp(18px, 3vw, 42px);
   justify-content: center;
+  align-content: start;
 }
 
 .title-lockup {
   width: 100%;
-  max-width: 560px;
-  align-self: center;
+  max-width: 430px;
+  align-self: start;
+  padding-top: clamp(10px, 5vh, 58px);
 }
 
 .eyebrow {
-  margin: 0 0 10px;
-  color: var(--gold);
+  margin: 0 0 12px;
+  color: #cdbf9a;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
   font-weight: 800;
 }
 
@@ -96,10 +107,11 @@ h2 {
 }
 
 h1 {
-  max-width: 10ch;
-  font-size: clamp(4rem, 9vw, 8.8rem);
+  max-width: 11ch;
+  font-size: clamp(3.15rem, 7vw, 6.8rem);
   text-transform: uppercase;
-  text-shadow: 0 18px 52px rgba(0, 0, 0, 0.42);
+  letter-spacing: 0;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.38);
 }
 
 h2 {
@@ -107,11 +119,11 @@ h2 {
 }
 
 .subtitle {
-  max-width: 42rem;
-  margin: 22px 0 0;
-  color: #d7e0dd;
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
-  line-height: 1.55;
+  max-width: 32rem;
+  margin: 18px 0 0;
+  color: #d4c9b8;
+  font-size: clamp(0.98rem, 1.35vw, 1.14rem);
+  line-height: 1.5;
 }
 
 .settings-shell,
@@ -119,21 +131,21 @@ h2 {
 .hud-panel {
   border: 1px solid var(--line);
   background: var(--panel);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.36);
-  backdrop-filter: blur(18px);
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.2);
+  backdrop-filter: none;
 }
 
 .settings-shell {
-  width: min(760px, 100%);
-  max-height: min(86svh, 850px);
+  width: min(780px, 100%);
+  max-height: min(88svh, 860px);
   overflow: auto;
-  padding: clamp(16px, 2vw, 24px);
-  border-radius: 8px;
+  padding: clamp(14px, 2vw, 22px);
+  border-radius: 4px;
 }
 
 .settings-grid {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .basic-grid {
@@ -142,15 +154,15 @@ h2 {
 
 .advanced-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 label {
   display: grid;
-  gap: 7px;
+  gap: 6px;
   color: var(--muted);
-  font-size: 0.8rem;
-  font-weight: 750;
+  font-size: 0.76rem;
+  font-weight: 760;
   text-transform: uppercase;
 }
 
@@ -168,8 +180,8 @@ label {
   flex: 0 0 auto;
   display: inline-grid;
   place-items: center;
-  color: #111;
-  background: rgba(234, 196, 106, 0.92);
+  color: #17130d;
+  background: #c9af6a;
   border-radius: 50%;
   font-size: 0.68rem;
   font-weight: 1000;
@@ -186,10 +198,10 @@ label {
   width: min(280px, calc(100vw - 28px));
   padding: 10px 11px;
   color: #f7f4ea;
-  background: rgba(5, 7, 10, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 6px;
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.38);
+  background: rgba(14, 12, 10, 0.98);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.22);
   font-size: 0.78rem;
   font-weight: 750;
   line-height: 1.35;
@@ -200,15 +212,15 @@ input[type="number"] {
   width: 100%;
   min-height: 42px;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(241, 234, 220, 0.18);
+  border-radius: 3px;
   padding: 0 12px;
   outline: none;
 }
 
 input[type="range"] {
-  accent-color: var(--teal);
+  accent-color: #c9af6a;
 }
 
 select:focus,
@@ -217,16 +229,17 @@ input:focus {
 }
 
 .advanced-settings {
-  margin-top: 16px;
+  margin-top: 14px;
   border-top: 1px solid var(--line);
-  padding-top: 16px;
+  padding-top: 14px;
 }
 
 .advanced-settings summary {
   cursor: pointer;
-  color: var(--ink);
+  color: #e7dcc8;
   font-weight: 900;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .toggle-label {
@@ -235,17 +248,17 @@ input:focus {
   align-items: center;
   justify-content: flex-start;
   gap: 10px;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 11px;
+  border: 1px solid rgba(241, 234, 220, 0.18);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.055);
   text-transform: uppercase;
 }
 
 .toggle-label input {
   width: 18px;
   height: 18px;
-  accent-color: var(--gold);
+  accent-color: #c9af6a;
 }
 
 .bias-settings {
@@ -260,9 +273,9 @@ input:focus {
   display: grid;
   place-items: center;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(241, 234, 220, 0.18);
+  border-radius: 3px;
   cursor: pointer;
   list-style: none;
 }
@@ -272,7 +285,7 @@ input:focus {
 }
 
 .bias-settings[open] summary {
-  border-color: var(--teal);
+  border-color: #c9af6a;
 }
 
 .bias-settings label {
@@ -284,25 +297,25 @@ input:focus {
   padding: 12px;
   color: var(--muted);
   background: var(--panel-strong);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(241, 234, 220, 0.2);
+  border-radius: 4px;
+  box-shadow: 0 8px 0 rgba(0, 0, 0, 0.24);
 }
 
 .bias-scale {
   display: flex;
   justify-content: space-between;
-  color: #d7e0dd;
+  color: #d4c9b8;
   font-size: 0.68rem;
   font-weight: 850;
   text-transform: uppercase;
 }
 
 .pre-round-summary {
-  margin: 16px 0;
+  margin: 14px 0;
   min-height: 48px;
-  color: #d9e6e2;
-  font-size: 0.92rem;
+  color: #d7cdbd;
+  font-size: 0.88rem;
   line-height: 1.45;
 }
 
@@ -310,24 +323,24 @@ button {
   min-height: 44px;
   padding: 0 18px;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(241, 234, 220, 0.2);
+  border-radius: 3px;
   cursor: pointer;
 }
 
 button:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .primary-button {
   width: 100%;
-  min-height: 60px;
-  background: linear-gradient(135deg, #e14f4f, #eac46a);
-  color: #111;
+  min-height: 56px;
+  background: #c9af6a;
+  color: #16110a;
   font-weight: 1000;
   text-transform: uppercase;
-  border: 0;
+  border: 1px solid #e1c987;
 }
 
 .hud {
@@ -492,7 +505,7 @@ button:hover {
 
   h1 {
     max-width: none;
-    font-size: clamp(3.2rem, 14vw, 6rem);
+    font-size: clamp(3rem, 12vw, 5.4rem);
   }
 
   .settings-shell {
@@ -538,7 +551,7 @@ button:hover {
   }
 
   h1 {
-    font-size: clamp(2.55rem, 16vw, 4.6rem);
+    font-size: clamp(2.35rem, 14vw, 4.2rem);
     line-height: 0.94;
   }
 
@@ -554,7 +567,7 @@ button:hover {
 
   .settings-shell {
     padding: 14px;
-    border-radius: 8px;
+    border-radius: 4px;
     overflow: visible;
   }
 
